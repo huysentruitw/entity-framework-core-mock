@@ -60,5 +60,35 @@ namespace EntityFrameworkMock.Tests
             Assert.That(dbSet.Count(), Is.EqualTo(1));
             Assert.That(dbSet.Any(x => x.Id == user.Id && x.FullName == user.FullName), Is.False);
         }
+
+        [Test]
+        public void DbSetMock_GivenEntityPropertyIsChangedAndSaveChangesIsCalled_ShouldFireSavedChangesEventWithCorrectUpdatedInfo()
+        {
+            var userId = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = userId, FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, x => x.Id);
+            var dbSet = dbSetMock.Object;
+
+            Assert.That(dbSet.Count(), Is.EqualTo(2));
+            var fetchedUser = dbSet.First(x => x.Id == userId);
+            fetchedUser.FullName = "Kramer Mark";
+
+            SavedChangesEventArgs<User> eventArgs = null;
+            dbSetMock.SavedChanges += (sender, args) => eventArgs = args;
+
+            ((IDbSetMock)dbSetMock).SaveChanges();
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.UpdatedEntities, Has.Length.EqualTo(1));
+            var updatedEntity = eventArgs.UpdatedEntities[0];
+            Assert.That(updatedEntity.UpdatedProperties, Has.Length.EqualTo(1));
+            var updatedProperty = updatedEntity.UpdatedProperties[0];
+            Assert.That(updatedProperty.Name, Is.EqualTo("FullName"));
+            Assert.That(updatedProperty.Original, Is.EqualTo("Mark Kramer"));
+            Assert.That(updatedProperty.New, Is.EqualTo("Kramer Mark"));
+        }
     }
 }

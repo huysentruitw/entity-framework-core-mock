@@ -63,6 +63,7 @@
     <Compile Include="Internal\IDbSetMock.cs" />
     <Compile Include="Internal\IKeyFactoryBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SavedChangesEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
