@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -118,6 +119,7 @@ namespace EntityFrameworkMock
             var type = typeof(TEntity);
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite)
+                .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
             return (snapshot, current) =>
@@ -137,6 +139,7 @@ namespace EntityFrameworkMock
             var type = typeof(TEntity);
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite)
+                .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
             var constructor = type.GetConstructor(Array.Empty<Type>());

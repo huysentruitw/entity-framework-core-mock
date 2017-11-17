@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using EntityFrameworkMock.Internal;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
 
 namespace EntityFrameworkMock.Tests
 {
@@ -62,7 +67,7 @@ namespace EntityFrameworkMock.Tests
         }
 
         [Test]
-        public void DbSetMock_GivenEntityPropertyIsChangedAndSaveChangesIsCalled_ShouldFireSavedChangesEventWithCorrectUpdatedInfo()
+        public void DbSetMock_SaveChanges_GivenEntityPropertyIsChanged_ShouldFireSavedChangesEventWithCorrectUpdatedInfo()
         {
             var userId = Guid.NewGuid();
             var dbSetMock = new DbSetMock<User>(new[]
@@ -89,6 +94,52 @@ namespace EntityFrameworkMock.Tests
             Assert.That(updatedProperty.Name, Is.EqualTo("FullName"));
             Assert.That(updatedProperty.Original, Is.EqualTo("Mark Kramer"));
             Assert.That(updatedProperty.New, Is.EqualTo("Kramer Mark"));
+        }
+
+        [Test]
+        public void DbSetMock_SaveChanges_GivenEntityPropertyMarkedAsNotMapped_ShouldNotMarkNotMappedPropertyAsModified()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new[]
+            {
+                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()}
+            }, x => x.Id);
+
+            SavedChangesEventArgs<NestedModel> eventArgs = null;
+            dbSetMock.SavedChanges += (sender, args) => eventArgs = args;
+
+            dbSetMock.Object.First().Value = "abc";
+
+            ((IDbSetMock)dbSetMock).SaveChanges();
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.UpdatedEntities, Has.Length.EqualTo(1));
+            Assert.That(eventArgs.UpdatedEntities.First().UpdatedProperties, Has.Length.EqualTo(1));
+            var updatedProperty = eventArgs.UpdatedEntities.First().UpdatedProperties.First();
+            Assert.That(updatedProperty.Name, Is.EqualTo("Value"));
+            Assert.That(updatedProperty.Original, Is.EqualTo(null));
+            Assert.That(updatedProperty.New, Is.EqualTo("abc"));
+        }
+
+        public class NestedModel
+        {
+            public Guid Id { get; set; }
+
+            public string Value { get; set; }
+
+            [NotMapped]
+            public Document NesteDocument
+            {
+                get { return new Document {Name = Guid.NewGuid().ToString("N")}; }
+                // ReSharper disable once ValueParameterNotUsed
+                set { }
+            }
+
+            public class Document
+            {
+                public string Name { get; set; }
+            }
         }
     }
 }
