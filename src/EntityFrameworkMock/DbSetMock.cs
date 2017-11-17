@@ -128,7 +128,7 @@ namespace EntityFrameworkMock
                         Original = x.GetValue(snapshot),
                         New = x.GetValue(current)
                     })
-                    .Where(x => !x.New.Equals(x.Original))
+                    .Where(x => !object.Equals(x.New, x.Original))
                     .ToArray();
         }
 
