@@ -15,11 +15,13 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using EntityFrameworkMock.Internal;
@@ -111,10 +113,8 @@ namespace EntityFrameworkMock
 
         private static UpdatePropertyInfo[] Diff(TEntity snapshot, TEntity current)
         {
-            var type = snapshot.GetType();
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.CanRead && x.CanWrite)
-                .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
+            var properties = snapshot.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
             return properties
@@ -128,19 +128,31 @@ namespace EntityFrameworkMock
                 .ToArray();
         }
 
-        private static TEntity Clone(TEntity original)
+        private static TEntity Clone(TEntity original) => CloneFuncCache.GetOrAdd(original.GetType(), CreateCloneFunc)(original);
+        private static readonly ConcurrentDictionary<Type, Func<TEntity, TEntity>> CloneFuncCache = new ConcurrentDictionary<Type, Func<TEntity, TEntity>>();
+        private static Func<TEntity, TEntity> CreateCloneFunc(Type entityType)
         {
-            var type = original.GetType();
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.CanRead && x.CanWrite)
-                .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
+            var properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
-            return properties.Aggregate((TEntity)Activator.CreateInstance(type), (clone, pi) =>
-            {
-                pi.SetValue(clone, pi.GetValue(original));
-                return clone;
-            });
+            var original = Expression.Parameter(typeof(TEntity), "original");
+            var clone = Expression.Variable(entityType, "clone");
+            var newClone = Expression.New(entityType);
+            var cloneBlock = Expression.Block(
+                new[] {clone},
+                Expression.Assign(clone, newClone),
+                Expression.Block(
+                    properties.Select(propertyInfo =>
+                    {
+                        var getter = Expression.Property(original, propertyInfo);
+                        var setter = propertyInfo.GetSetMethod();
+                        return Expression.Call(clone, setter, getter);
+                    })
+                ),
+                clone);
+
+            return Expression.Lambda<Func<TEntity, TEntity>>(cloneBlock, original).Compile();
         }
 
         private class DbSetOperation
