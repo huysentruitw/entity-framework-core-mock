@@ -20,7 +20,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using EntityFrameworkMock.Internal;
@@ -32,8 +31,6 @@ namespace EntityFrameworkMock
         where TEntity : class
     {
         private readonly Func<TEntity, object> _keyFactory;
-        private readonly Func<TEntity, TEntity> _clone;
-        private readonly Func<TEntity, TEntity, UpdatePropertyInfo[]> _diff;
         private readonly Dictionary<object, TEntity> _entities = new Dictionary<object, TEntity>();
         private readonly Dictionary<object, TEntity> _snapshot = new Dictionary<object, TEntity>();
         private List<DbSetOperation> _operations = new List<DbSetOperation>();
@@ -41,9 +38,7 @@ namespace EntityFrameworkMock
         public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, object> keyFactory, bool asyncQuerySupport = true)
         {
             _keyFactory = keyFactory;
-            _clone = CreateCloneFunc();
-            _diff = CreateDiffFunc();
-            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x), _clone(x)));
+            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x), Clone(x)));
 
             var data = _entities.Values.AsQueryable();
             As<IQueryable<TEntity>>().Setup(x => x.Provider).Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
@@ -100,7 +95,7 @@ namespace EntityFrameworkMock
                         new UpdatedEntityInfo<TEntity>
                         {
                             Entity = entity.Value,
-                            UpdatedProperties = _diff(snapshot.Value, entity.Value)
+                            UpdatedProperties = Diff(snapshot.Value, entity.Value)
                         }
                     )
                 .Where(x => x.UpdatedProperties.Any())
@@ -111,63 +106,41 @@ namespace EntityFrameworkMock
         {
             _snapshot.Clear();
             foreach (var kvp in _entities)
-                _snapshot.Add(kvp.Key, _clone(kvp.Value));
+                _snapshot.Add(kvp.Key, Clone(kvp.Value));
         }
 
-        private Func<TEntity, TEntity, UpdatePropertyInfo[]> CreateDiffFunc()
+        private static UpdatePropertyInfo[] Diff(TEntity snapshot, TEntity current)
         {
-            var type = typeof(TEntity);
+            var type = snapshot.GetType();
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite)
                 .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
-            return (snapshot, current) =>
-                properties
-                    .Select(x => new UpdatePropertyInfo
-                    {
-                        Name = x.Name,
-                        Original = x.GetValue(snapshot),
-                        New = x.GetValue(current)
-                    })
-                    .Where(x => !object.Equals(x.New, x.Original))
-                    .ToArray();
+            return properties
+                .Select(x => new UpdatePropertyInfo
+                {
+                    Name = x.Name,
+                    Original = x.GetValue(snapshot),
+                    New = x.GetValue(current)
+                })
+                .Where(x => !object.Equals(x.New, x.Original))
+                .ToArray();
         }
 
-        private Func<TEntity, TEntity> CreateCloneFunc()
+        private static TEntity Clone(TEntity original)
         {
-            var type = typeof(TEntity);
+            var type = original.GetType();
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite)
                 .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .ToArray();
 
-            var constructor = type.GetConstructor(Array.Empty<Type>());
-            if (constructor == null) throw new InvalidOperationException($"{type.Name} is missing a parameterless constructor");
-
-            var original = Expression.Parameter(type);
-
-            // var clone = new TEntity();
-            var clone = Expression.Variable(type, "clone");
-            var newExpression = Expression.New(constructor);
-
-            var cloneBlock = Expression.Block(
-                new ParameterExpression[] {clone},
-                Expression.Assign(clone, newExpression),
-                // foreach (var property in properties)
-                Expression.Block(
-                    properties.Select(propertyInfo =>
-                    {
-                        // property.SetValue(clone, property.GetValue(original));
-                        var getter = Expression.Property(original, propertyInfo);
-                        var setter = propertyInfo.GetSetMethod();
-                        return Expression.Call(clone, setter, getter);
-                    })
-                ),
-                clone
-            );
-
-            return Expression.Lambda<Func<TEntity, TEntity>>(cloneBlock, original).Compile();
+            return properties.Aggregate((TEntity)Activator.CreateInstance(type), (clone, pi) =>
+            {
+                pi.SetValue(clone, pi.GetValue(original));
+                return clone;
+            });
         }
 
         private class DbSetOperation

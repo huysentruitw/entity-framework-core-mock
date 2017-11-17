@@ -122,6 +122,17 @@ namespace EntityFrameworkMock.Tests
             Assert.That(updatedProperty.New, Is.EqualTo("abc"));
         }
 
+        [Test]
+        public void DbSetMock_GivenAbstractEntityModel_ShouldNotThrowException()
+        {
+            var dbSetMock = new DbSetMock<AbstractModel>(new[]
+            {
+                new ConcreteModel {Id = Guid.NewGuid()}
+            }, x => x.Id);
+
+            ((IDbSetMock)dbSetMock).SaveChanges();
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }
@@ -140,6 +151,15 @@ namespace EntityFrameworkMock.Tests
             {
                 public string Name { get; set; }
             }
+        }
+
+        public abstract class AbstractModel
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class ConcreteModel : AbstractModel
+        {
         }
     }
 }
