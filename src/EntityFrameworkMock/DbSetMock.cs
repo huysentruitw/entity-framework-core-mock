@@ -145,7 +145,7 @@ namespace EntityFrameworkMock
                 Expression.Block(
                     properties.Select(propertyInfo =>
                     {
-                        var getter = Expression.Property(original, propertyInfo);
+                        var getter = Expression.Property(Expression.Convert(original, entityType), propertyInfo);
                         var setter = propertyInfo.GetSetMethod();
                         return Expression.Call(clone, setter, getter);
                     })

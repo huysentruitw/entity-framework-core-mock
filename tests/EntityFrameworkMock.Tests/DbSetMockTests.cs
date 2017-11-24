@@ -122,17 +122,6 @@ namespace EntityFrameworkMock.Tests
             Assert.That(updatedProperty.New, Is.EqualTo("abc"));
         }
 
-        [Test]
-        public void DbSetMock_GivenAbstractEntityModel_ShouldNotThrowException()
-        {
-            var dbSetMock = new DbSetMock<AbstractModel>(new[]
-            {
-                new ConcreteModel {Id = Guid.NewGuid()}
-            }, x => x.Id);
-
-            ((IDbSetMock)dbSetMock).SaveChanges();
-        }
-
         public class NestedModel
         {
             public Guid Id { get; set; }
@@ -142,7 +131,7 @@ namespace EntityFrameworkMock.Tests
             [NotMapped]
             public Document NesteDocument
             {
-                get { return new Document {Name = Guid.NewGuid().ToString("N")}; }
+                get { return new Document { Name = Guid.NewGuid().ToString("N") }; }
                 // ReSharper disable once ValueParameterNotUsed
                 set { }
             }
@@ -153,6 +142,17 @@ namespace EntityFrameworkMock.Tests
             }
         }
 
+        [Test]
+        public void DbSetMock_SaveChanges_GivenAbstractEntityModel_ShouldNotThrowException()
+        {
+            var dbSetMock = new DbSetMock<AbstractModel>(new[]
+            {
+                new ConcreteModel {Id = Guid.NewGuid()}
+            }, x => x.Id);
+
+            ((IDbSetMock)dbSetMock).SaveChanges();
+        }
+
         public abstract class AbstractModel
         {
             public Guid Id { get; set; }
@@ -160,6 +160,7 @@ namespace EntityFrameworkMock.Tests
 
         public class ConcreteModel : AbstractModel
         {
+            public string Name { get; set; } = "SomeName";
         }
     }
 }
