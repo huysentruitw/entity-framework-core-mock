@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using EntityFrameworkMock.Internal;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Execution;
 
 namespace EntityFrameworkMock.Tests
 {

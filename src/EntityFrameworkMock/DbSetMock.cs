@@ -19,10 +19,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Data.Entity.Core;
+using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading;
 using EntityFrameworkMock.Internal;
 using Moq;
@@ -76,14 +80,14 @@ namespace EntityFrameworkMock
         private void AddEntity(TEntity entity)
         {
             var key = _keyFactory(entity);
-            if (_entities.ContainsKey(key)) throw new DbUpdateException();
+            if (_entities.ContainsKey(key)) ThrowDbUpdateException();
             _entities.Add(key, entity);
         }
 
         private void RemoveEntity(TEntity entity)
         {
             var key = _keyFactory(entity);
-            _entities.Remove(key);
+            if (!_entities.Remove(key)) ThrowDbUpdateConcurrencyException();
         }
 
         private UpdatedEntityInfo<TEntity>[] GetUpdatedEntities()
@@ -153,6 +157,22 @@ namespace EntityFrameworkMock
                 clone);
 
             return Expression.Lambda<Func<TEntity, TEntity>>(cloneBlock, original).Compile();
+        }
+
+        private static void ThrowDbUpdateException()
+        {
+            const string message = "Violation of PRIMARY KEY constraint 'KEY'. Cannot insert duplicate key in object 'SCHEMA.TABLE'. The duplicate key value is ().\nThe statement has been terminated.";
+            const string seeInnerExceptionMessage = "An error occurred while updating the entries. See the inner exception for details.";
+            var sqlException = SqlExceptionCreator.Create(message, 2627);
+            var updateException = new UpdateException(seeInnerExceptionMessage, sqlException);
+            throw new DbUpdateException(seeInnerExceptionMessage, updateException);
+        }
+
+        private static void ThrowDbUpdateConcurrencyException()
+        {
+            const string message = "Store update, insert, or delete statement affected an unexpected number of rows (0). Entities may have been modified or deleted since entities were loaded. See http://go.microsoft.com/fwlink/?LinkId=472540 for information on understanding and handling optimistic concurrency exceptions.";
+            var innerException = new OptimisticConcurrencyException(message);
+            throw new DbUpdateConcurrencyException(innerException.Message, innerException);
         }
 
         private class DbSetOperation

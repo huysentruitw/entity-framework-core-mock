@@ -120,6 +120,15 @@ namespace EntityFrameworkMock.Tests
             Assert.Throws<DbUpdateException>(() => dbContextMock.Object.SaveChanges());
         }
 
+        [Test]
+        public void DbContextMock_CreateDbSetMock_DeleteUnknownModel_ShouldThrowDbUpdateConcurrencyException()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
+            dbSetMock.Object.Remove(new User {Id = Guid.NewGuid()});
+            Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
