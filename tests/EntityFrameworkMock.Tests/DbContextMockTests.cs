@@ -129,6 +129,23 @@ namespace EntityFrameworkMock.Tests
             Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
         }
 
+        [Test]
+        public void DbContextMock_CreateDbSetMock_AddMultipleModelsWithDatabaseGeneratedIdentityKey_ShouldGenerateSequentialKey()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.GeneratedKeyModels);
+            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "first"});
+            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "second"});
+            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "third" });
+            dbContextMock.Object.SaveChanges();
+
+            Assert.That(dbSetMock.Object.Min(x => x.Id), Is.EqualTo(1));
+            Assert.That(dbSetMock.Object.Max(x => x.Id), Is.EqualTo(3));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 1).Value, Is.EqualTo("first"));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 2).Value, Is.EqualTo("second"));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 3).Value, Is.EqualTo("third"));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
@@ -147,6 +164,8 @@ namespace EntityFrameworkMock.Tests
             public virtual DbSet<User> Users { get; set; }
 
             public virtual DbSet<NoKeyModel> NoKeyModels { get; set; }
+
+            public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
         }
     }
 }
