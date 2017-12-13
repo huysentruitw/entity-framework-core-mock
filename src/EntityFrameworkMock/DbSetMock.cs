@@ -33,15 +33,16 @@ namespace EntityFrameworkMock
     public sealed class DbSetMock<TEntity> : Mock<DbSet<TEntity>>, IDbSetMock
         where TEntity : class
     {
-        private readonly Func<TEntity, object> _keyFactory;
+        private readonly Func<TEntity, KeyContext, object> _keyFactory;
         private readonly Dictionary<object, TEntity> _entities = new Dictionary<object, TEntity>();
         private readonly Dictionary<object, TEntity> _snapshot = new Dictionary<object, TEntity>();
         private List<DbSetOperation> _operations = new List<DbSetOperation>();
+        private readonly KeyContext _keyContext = new KeyContext();
 
-        public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, object> keyFactory, bool asyncQuerySupport = true)
+        public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory, bool asyncQuerySupport = true)
         {
             _keyFactory = keyFactory;
-            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x), Clone(x)));
+            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x, _keyContext), Clone(x)));
 
             var data = _entities.Values.AsQueryable();
             As<IQueryable<TEntity>>().Setup(x => x.Provider).Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
@@ -76,14 +77,14 @@ namespace EntityFrameworkMock
 
         private void AddEntity(TEntity entity)
         {
-            var key = _keyFactory(entity);
+            var key = _keyFactory(entity, _keyContext);
             if (_entities.ContainsKey(key)) ThrowDbUpdateException();
             _entities.Add(key, entity);
         }
 
         private void RemoveEntity(TEntity entity)
         {
-            var key = _keyFactory(entity);
+            var key = _keyFactory(entity, _keyContext);
             if (!_entities.Remove(key)) ThrowDbUpdateConcurrencyException();
         }
 

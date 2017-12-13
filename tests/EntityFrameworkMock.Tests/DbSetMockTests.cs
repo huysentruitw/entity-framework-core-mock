@@ -16,7 +16,7 @@ namespace EntityFrameworkMock.Tests
         public void DbSetMock_GivenEntityIsAdded_ShouldAddAfterCallingSaveChanges()
         {
             var user = new User {Id = Guid.NewGuid(), FullName = "Fake Drake"};
-            var dbSetMock = new DbSetMock<User>(null, x => x.Id);
+            var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
 
             Assert.That(dbSet.Count(), Is.EqualTo(0));
@@ -31,7 +31,7 @@ namespace EntityFrameworkMock.Tests
         public async Task DbSetMock_AsyncProvider()
         {
             var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
-            var dbSetMock = new DbSetMock<User>(null, x => x.Id);
+            var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
 
             Assert.That(await dbSet.CountAsync(), Is.EqualTo(0));
@@ -50,7 +50,7 @@ namespace EntityFrameworkMock.Tests
             {
                 user,
                 new User {Id = Guid.NewGuid(), FullName = "Jackira Spicy"}
-            }, x => x.Id);
+            }, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
 
             Assert.That(dbSet.Count(), Is.EqualTo(2));
@@ -70,7 +70,7 @@ namespace EntityFrameworkMock.Tests
             {
                 new User {Id = userId, FullName = "Mark Kramer"},
                 new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
-            }, x => x.Id);
+            }, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
 
             Assert.That(dbSet.Count(), Is.EqualTo(2));
@@ -100,7 +100,7 @@ namespace EntityFrameworkMock.Tests
                 new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
                 new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
                 new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()}
-            }, x => x.Id);
+            }, (x, _) => x.Id);
 
             SavedChangesEventArgs<NestedModel> eventArgs = null;
             dbSetMock.SavedChanges += (sender, args) => eventArgs = args;
@@ -144,7 +144,7 @@ namespace EntityFrameworkMock.Tests
             var dbSetMock = new DbSetMock<AbstractModel>(new[]
             {
                 new ConcreteModel {Id = Guid.NewGuid()}
-            }, x => x.Id);
+            }, (x, _) => x.Id);
 
             ((IDbSetMock)dbSetMock).SaveChanges();
         }

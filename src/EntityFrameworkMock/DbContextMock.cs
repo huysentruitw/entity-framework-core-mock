@@ -45,14 +45,14 @@ namespace EntityFrameworkMock
             Reset();
         }
 
-        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null, long identitySeed = 1)
+        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null)
             where TEntity : class
         {
-            var entityKeyFactory = _keyFactoryBuilder.BuildKeyFactory<TEntity>(identitySeed);
+            var entityKeyFactory = _keyFactoryBuilder.BuildKeyFactory<TEntity>();
             return CreateDbSetMock(dbSetSelector, entityKeyFactory, initialEntities);
         }
 
-        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, Func<TEntity, object> entityKeyFactory, IEnumerable<TEntity> initialEntities = null)
+        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, Func<TEntity, KeyContext, object> entityKeyFactory, IEnumerable<TEntity> initialEntities = null)
             where TEntity : class
         {
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;

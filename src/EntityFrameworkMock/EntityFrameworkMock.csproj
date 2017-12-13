@@ -61,6 +61,7 @@
     <Compile Include="Internal\DbAsyncEnumerator.cs" />
     <Compile Include="Internal\DbAsyncQueryProvider.cs" />
     <Compile Include="Internal\IDbSetMock.cs" />
+    <Compile Include="Internal\KeyContext.cs" />
     <Compile Include="Internal\IKeyFactoryBuilder.cs" />
     <Compile Include="Internal\SqlExceptionCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

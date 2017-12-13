@@ -15,7 +15,7 @@ namespace EntityFrameworkMock.Tests.Internal
             var builder = new AttributeBasedKeyFactoryBuilder<KeyAttribute>();
             var factory = builder.BuildKeyFactory<User>();
             var userId = Guid.NewGuid();
-            var key = factory(new User {Id = userId, FullName = "Jake Snake"});
+            var key = factory(new User {Id = userId, FullName = "Jake Snake"}, null);
             Assert.That(key, Is.EqualTo(new Tuple<Guid>(userId)));
         }
 
@@ -26,7 +26,7 @@ namespace EntityFrameworkMock.Tests.Internal
             var factory = builder.BuildKeyFactory<TenantUser>();
             var userId = Guid.NewGuid();
             var tenant = Guid.NewGuid().ToString("N");
-            var key = factory(new TenantUser { Id = userId, Tenant = tenant, FullName = "Jake Snake" });
+            var key = factory(new TenantUser { Id = userId, Tenant = tenant, FullName = "Jake Snake" }, null);
             Assert.That(key, Is
                 .EqualTo(new Tuple<Guid, string>(userId, tenant))
                 .Or

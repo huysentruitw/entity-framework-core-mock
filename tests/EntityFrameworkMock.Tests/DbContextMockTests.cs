@@ -104,7 +104,7 @@ namespace EntityFrameworkMock.Tests
         public void DbContextMock_CreateDbSetMock_CustomKeyFactoryForModelWithoutKeyAttributes_ShouldNotThrowException()
         {
             var dbContextMock = new DbContextMock<TestDbContext>("abc");
-            Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels, x => x.Id));
+            Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels, (x, _) => x.Id));
         }
 
         [Test]
@@ -133,9 +133,11 @@ namespace EntityFrameworkMock.Tests
         public void DbContextMock_CreateDbSetMock_AddMultipleModelsWithDatabaseGeneratedIdentityKey_ShouldGenerateSequentialKey()
         {
             var dbContextMock = new DbContextMock<TestDbContext>("abc");
-            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.GeneratedKeyModels);
-            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "first"});
-            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "second"});
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.GeneratedKeyModels, new[]
+            {
+                new GeneratedKeyModel {Value = "first"},
+                new GeneratedKeyModel {Value = "second"}
+            });
             dbSetMock.Object.Add(new GeneratedKeyModel {Value = "third" });
             dbContextMock.Object.SaveChanges();
 

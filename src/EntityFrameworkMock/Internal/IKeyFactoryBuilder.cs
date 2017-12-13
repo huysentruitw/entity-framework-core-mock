@@ -4,6 +4,6 @@ namespace EntityFrameworkMock.Internal
 {
     internal interface IKeyFactoryBuilder
     {
-        Func<T, object> BuildKeyFactory<T>(long identitySeed);
+        Func<T, KeyContext, object> BuildKeyFactory<T>();
     }
 }
