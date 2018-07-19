@@ -12,13 +12,16 @@ Easy Mock wrapper for mocking EF6 DbContext and DbSet using Moq
 
 This library contains a DbContext and DbSet wrapper based on the Moq framework.
 
-It emulates the following EF behavior:
+Supports:
 
-* Only save entity updates/inserts/delete when `SaveChanges` or `SaveChangesAsync` is called
-* Supports auto-increment identity columns with the `[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]` attributes
-* Supports primary key on multiple columns with the `[Key, Column(Order = X)]` attributes
-* Throws a `DbUpdateException` when inserting 2 or more entities with the same primary key while calling `SaveChanges` / `SaveChangesAsync`
-* Throws a `DbUpdateConcurrencyException` when removing a model that no longer exists
+* In-memory storage of test data
+* Querying of in-memory test data
+* Tracks updates, inserts and deletes of in-memory test data
+* Emulation of `SaveChanges` and `SaveChangesAsync` (only saves tracked changes to the mocked in-memory DbSet when one of these methods are called)
+* Auto-increment identity columns, annotated by the `[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]` attribute
+* Primary key on multiple columns, annotated by the `[Key, Column(Order = X)]` attributes
+* Throwing a `DbUpdateException` when inserting 2 or more entities with the same primary key while calling `SaveChanges` / `SaveChangesAsync` (emulating EF behavior)
+* Throwing a `DbUpdateConcurrencyException` when removing a model that no longer exists (emulating EF behavior)
 
 Since both, `DbSetMock` and `DbContextMock` inherit from `Mock<DbSet>` and `Mock<DbContext>` respectively, you can use all known [Moq](https://github.com/Moq/moq4/wiki/Quickstart) features.
 
