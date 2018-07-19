@@ -15,8 +15,8 @@ This library contains a DbContext and DbSet wrapper based on the Moq framework.
 Supports:
 
 * In-memory storage of test data
-* Querying of in-memory test data
-* Tracks updates, inserts and deletes of in-memory test data
+* Querying of in-memory test data (synchronous or asynchronous)
+* Tracking of updates, inserts and deletes of in-memory test data
 * Emulation of `SaveChanges` and `SaveChangesAsync` (only saves tracked changes to the mocked in-memory DbSet when one of these methods are called)
 * Auto-increment identity columns, annotated by the `[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]` attribute
 * Primary key on multiple columns, annotated by the `[Key, Column(Order = X)]` attributes
