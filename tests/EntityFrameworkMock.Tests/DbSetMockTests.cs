@@ -13,6 +13,22 @@ namespace EntityFrameworkMock.Tests
     public class DbSetMockTests
     {
         [Test]
+        public void DbSetMock_AsNoTracking_ShouldBeMocked()
+        {
+            var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+            Assert.That(dbSet.AsNoTracking(), Is.EqualTo(dbSet));
+        }
+
+        [Test]
+        public void DbSetMock_Include_ShouldBeMocked()
+        {
+            var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+            Assert.That(dbSet.Include(x => x.User), Is.EqualTo(dbSet));
+        }
+
+        [Test]
         public void DbSetMock_GivenEntityIsAdded_ShouldAddAfterCallingSaveChanges()
         {
             var user = new User {Id = Guid.NewGuid(), FullName = "Fake Drake"};

@@ -64,6 +64,7 @@
     <Compile Include="Internal\AttributeBasedKeyFactoryBuilderTests.cs" />
     <Compile Include="Models\GeneratedKeyModel.cs" />
     <Compile Include="Models\NoKeyModel.cs" />
+    <Compile Include="Models\Order.cs" />
     <Compile Include="Models\TenantUser.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
