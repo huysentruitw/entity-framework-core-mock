@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\EntityFrameworkMock\EntityFrameworkMock.csproj" />
+    <ProjectReference Include="..\..\src\EntityFrameworkMock.Moq\EntityFrameworkMock.Moq.csproj" />
   </ItemGroup>
   
   </Project>

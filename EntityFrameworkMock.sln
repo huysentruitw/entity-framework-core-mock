@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkMock", "src\EntityFrameworkMock\EntityFrameworkMock.csproj", "{84B1E11A-C0A1-42F5-9F7A-0C55ED2C7D9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkMock.Moq", "src\EntityFrameworkMock.Moq\EntityFrameworkMock.Moq.csproj", "{84B1E11A-C0A1-42F5-9F7A-0C55ED2C7D9C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkMock.Tests", "tests\EntityFrameworkMock.Tests\EntityFrameworkMock.Tests.csproj", "{28EB943C-8D7B-431C-9E44-E849043FF0D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkMock.Moq.Tests", "tests\EntityFrameworkMock.Moq.Tests\EntityFrameworkMock.Moq.Tests.csproj", "{28EB943C-8D7B-431C-9E44-E849043FF0D5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{91C5E8E2-DEB7-4F2E-BBAE-2962B44F7C31}"
 	ProjectSection(SolutionItems) = preProject

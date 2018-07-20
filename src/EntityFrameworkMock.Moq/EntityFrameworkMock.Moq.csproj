@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
-    <Title>EntityFrameworkMock</Title>
+    <Title>EntityFrameworkMock.Moq</Title>
     <Product>EntityFrameworkMock</Product>
     <Version>1.0.0.0</Version>
     <Authors>Wouter Huysentruit</Authors>
