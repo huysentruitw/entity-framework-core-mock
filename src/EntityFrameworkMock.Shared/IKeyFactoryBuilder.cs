@@ -16,28 +16,10 @@
 
 using System;
 
-namespace EntityFrameworkMock
+namespace EntityFrameworkMock.Shared
 {
-    public class SavedChangesEventArgs<TEntity> : EventArgs
-        where TEntity : class
+    public interface IKeyFactoryBuilder
     {
-        public UpdatedEntityInfo<TEntity>[] UpdatedEntities { get; set; }
-    }
-
-    public class UpdatedEntityInfo<TEntity>
-        where TEntity : class
-    {
-        public TEntity Entity { get; set; }
-
-        public UpdatePropertyInfo[] UpdatedProperties { get; set; }
-    }
-
-    public class UpdatePropertyInfo
-    {
-        public string Name { get; set; }
-
-        public object Original { get; set; }
-
-        public object New { get; set; }
+        Func<T, KeyContext, object> BuildKeyFactory<T>();
     }
 }

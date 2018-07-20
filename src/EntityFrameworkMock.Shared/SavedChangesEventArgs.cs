@@ -14,10 +14,30 @@
  * limitations under the License.
  */
 
-namespace EntityFrameworkMock.Internal
+using System;
+
+namespace EntityFrameworkMock.Shared
 {
-    public interface IDbSetMock
+    public sealed class SavedChangesEventArgs<TEntity> : EventArgs
+        where TEntity : class
     {
-        int SaveChanges();
+        public UpdatedEntityInfo<TEntity>[] UpdatedEntities { get; set; }
+    }
+
+    public sealed class UpdatedEntityInfo<TEntity>
+        where TEntity : class
+    {
+        public TEntity Entity { get; set; }
+
+        public UpdatePropertyInfo[] UpdatedProperties { get; set; }
+    }
+
+    public sealed class UpdatePropertyInfo
+    {
+        public string Name { get; set; }
+
+        public object Original { get; set; }
+
+        public object New { get; set; }
     }
 }

@@ -3,10 +3,10 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
     // From https://msdn.microsoft.com/en-us/library/dn314429(v=vs.113).aspx
-    internal class DbAsyncEnumerable<TEntity> : EnumerableQuery<TEntity>, IDbAsyncEnumerable<TEntity>, IQueryable<TEntity>
+    public class DbAsyncEnumerable<TEntity> : EnumerableQuery<TEntity>, IDbAsyncEnumerable<TEntity>, IQueryable<TEntity>
     {
         public DbAsyncEnumerable(IEnumerable<TEntity> enumerable)
             : base(enumerable)

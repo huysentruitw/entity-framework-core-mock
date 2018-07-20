@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
-    public class KeyContext
+    public interface IDbSetMock
     {
-        private long _nextIdentity = 1;
-
-        public long NextIdentity => _nextIdentity++;
+        int SaveChanges();
     }
 }

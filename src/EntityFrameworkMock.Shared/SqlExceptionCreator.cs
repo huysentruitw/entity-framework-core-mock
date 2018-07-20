@@ -20,9 +20,9 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
-    internal static class SqlExceptionCreator
+    public static class SqlExceptionCreator
     {
         public static SqlException Create(string message, int errorCode)
         {

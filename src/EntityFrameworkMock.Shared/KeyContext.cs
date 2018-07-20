@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-using System;
-
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
-    internal interface IKeyFactoryBuilder
+    public sealed class KeyContext
     {
-        Func<T, KeyContext, object> BuildKeyFactory<T>();
+        private long _nextIdentity = 1;
+
+        public long NextIdentity => _nextIdentity++;
     }
 }

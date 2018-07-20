@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using EntityFrameworkMock.Internal;
-using EntityFrameworkMock.Tests.Models;
+using EntityFrameworkMock.Shared.Tests.Models;
 using NUnit.Framework;
 
-namespace EntityFrameworkMock.Tests.Internal
+namespace EntityFrameworkMock.Shared.Tests
 {
     [TestFixture]
     public class AttributeBasedKeyFactoryBuilderTests

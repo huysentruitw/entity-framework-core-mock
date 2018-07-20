@@ -4,14 +4,14 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
     // From https://msdn.microsoft.com/en-us/library/dn314429(v=vs.113).aspx
-    internal class DbAsyncQueryProvider<TEntity> : IDbAsyncQueryProvider
+    public class DbAsyncQueryProvider<TEntity> : IDbAsyncQueryProvider
     {
         private readonly IQueryProvider _inner;
 
-        internal DbAsyncQueryProvider(IQueryProvider inner)
+        public DbAsyncQueryProvider(IQueryProvider inner)
         {
             _inner = inner;
         }

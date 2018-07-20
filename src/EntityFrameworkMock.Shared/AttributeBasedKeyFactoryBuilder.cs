@@ -20,9 +20,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
-    internal class AttributeBasedKeyFactoryBuilder<TAttribute> : IKeyFactoryBuilder
+    public sealed class AttributeBasedKeyFactoryBuilder<TAttribute> : IKeyFactoryBuilder
         where TAttribute : Attribute
     {
         public Func<T, KeyContext, object> BuildKeyFactory<T>()

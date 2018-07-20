@@ -25,7 +25,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
-using EntityFrameworkMock.Internal;
+using EntityFrameworkMock.Shared;
 using Moq;
 
 namespace EntityFrameworkMock

@@ -3,10 +3,10 @@ using System.Data.Entity.Infrastructure;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EntityFrameworkMock.Internal
+namespace EntityFrameworkMock.Shared
 {
     // From https://msdn.microsoft.com/en-us/library/dn314429(v=vs.113).aspx
-    internal class DbAsyncEnumerator<TEntity> : IDbAsyncEnumerator<TEntity>
+    public class DbAsyncEnumerator<TEntity> : IDbAsyncEnumerator<TEntity>
     {
         private readonly IEnumerator<TEntity> _inner;
 
