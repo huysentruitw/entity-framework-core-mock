@@ -52,6 +52,9 @@ namespace EntityFrameworkMock
         public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, Func<TEntity, KeyContext, object> entityKeyFactory, IEnumerable<TEntity> initialEntities = null)
             where TEntity : class
         {
+            if (dbSetSelector == null) throw new ArgumentNullException(nameof(dbSetSelector));
+            if (entityKeyFactory == null) throw new ArgumentNullException(nameof(entityKeyFactory));
+
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
