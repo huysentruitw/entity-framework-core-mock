@@ -48,8 +48,8 @@ namespace EntityFrameworkMock
             As<IQueryable<TEntity>>().Setup(x => x.Provider).Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
             As<IQueryable<TEntity>>().Setup(x => x.Expression).Returns(data.Expression);
             As<IQueryable<TEntity>>().Setup(x => x.ElementType).Returns(data.ElementType);
-            As<IQueryable<TEntity>>().Setup(x => x.GetEnumerator()).Returns(_entities.Values.GetEnumerator());
-            if (asyncQuerySupport) As<IDbAsyncEnumerable<TEntity>>().Setup(x => x.GetAsyncEnumerator()).Returns(new DbAsyncEnumerator<TEntity>(_entities.Values.GetEnumerator()));
+            As<IQueryable<TEntity>>().Setup(x => x.GetEnumerator()).Returns(() => _entities.Values.GetEnumerator());
+            if (asyncQuerySupport) As<IDbAsyncEnumerable<TEntity>>().Setup(x => x.GetAsyncEnumerator()).Returns(() => new DbAsyncEnumerator<TEntity>(_entities.Values.GetEnumerator()));
             Setup(x => x.AsNoTracking()).Returns(() => Object);
             Setup(x => x.Include(It.IsAny<string>())).Returns(() => Object);
 
