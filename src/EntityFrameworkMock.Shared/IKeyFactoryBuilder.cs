@@ -16,7 +16,7 @@
 
 using System;
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     public interface IKeyFactoryBuilder
     {

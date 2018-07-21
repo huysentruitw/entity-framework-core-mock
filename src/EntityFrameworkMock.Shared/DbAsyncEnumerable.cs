@@ -3,7 +3,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     // From https://msdn.microsoft.com/en-us/library/dn314429(v=vs.113).aspx
     public class DbAsyncEnumerable<TEntity> : EnumerableQuery<TEntity>, IDbAsyncEnumerable<TEntity>, IQueryable<TEntity>

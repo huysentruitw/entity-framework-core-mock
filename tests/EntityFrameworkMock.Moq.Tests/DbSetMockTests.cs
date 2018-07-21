@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using EntityFrameworkMock.Shared;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 

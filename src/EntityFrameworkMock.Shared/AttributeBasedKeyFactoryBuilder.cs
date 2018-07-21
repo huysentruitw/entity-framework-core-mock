@@ -20,7 +20,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     public sealed class AttributeBasedKeyFactoryBuilder<TAttribute> : IKeyFactoryBuilder
         where TAttribute : Attribute

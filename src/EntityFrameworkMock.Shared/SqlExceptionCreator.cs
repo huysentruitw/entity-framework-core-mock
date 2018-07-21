@@ -20,7 +20,7 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     public static class SqlExceptionCreator
     {

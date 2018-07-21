@@ -4,7 +4,6 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EntityFrameworkMock.Shared;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 

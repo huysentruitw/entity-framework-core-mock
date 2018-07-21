@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     public sealed class KeyContext
     {

@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EntityFrameworkMock.Shared
+namespace EntityFrameworkMock
 {
     // From https://msdn.microsoft.com/en-us/library/dn314429(v=vs.113).aspx
     public class DbAsyncQueryProvider<TEntity> : IDbAsyncQueryProvider
