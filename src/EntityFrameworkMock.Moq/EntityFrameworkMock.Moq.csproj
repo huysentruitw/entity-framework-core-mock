@@ -12,8 +12,6 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Easy Mock wrapper for mocking EF6 DbContext and DbSet using Moq</Description>
     <Copyright>Copyright 2017-2018 Wouter Huysentruit</Copyright>
-    <!-- Workaround to include referenced projects in NuGet package -->
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,14 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntityFrameworkMock.Shared\EntityFrameworkMock.Shared.csproj" IncludeInPackage="true" />
+    <ProjectReference Include="..\EntityFrameworkMock.Shared\EntityFrameworkMock.Shared.csproj" />
   </ItemGroup>
-
-  <!-- Workaround to include referenced projects in NuGet package -->
-  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
-    <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('IncludeInPackage', 'true'))" />
-    </ItemGroup>
-  </Target>
 
 </Project>
