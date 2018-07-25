@@ -1,5 +1,8 @@
-﻿using NUnit.Framework;
+﻿using EntityFrameworkMock.Tests.Models;
+using NUnit.Framework;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +16,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         public void DbSetMock_AsNoTracking_ShouldBeMocked()
         {
             var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
             Assert.That(dbSet.AsNoTracking(), Is.EqualTo(dbSet));
         }
 
@@ -21,7 +24,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         public void DbSetMock_Include_ShouldBeMocked()
         {
             var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
             Assert.That(dbSet.Include(x => x.User), Is.EqualTo(dbSet));
         }
 
@@ -30,7 +33,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         {
             var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
             var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
 
             Assert.That(dbSet.Count(), Is.EqualTo(0));
             dbSet.Add(user);
@@ -45,7 +48,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         {
             var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
             var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
 
             Assert.That(await dbSet.CountAsync(), Is.EqualTo(0));
             dbSet.Add(user);
@@ -64,7 +67,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
                 user,
                 new User {Id = Guid.NewGuid(), FullName = "Jackira Spicy"}
             }, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
 
             Assert.That(dbSet.Count(), Is.EqualTo(2));
             dbSet.Remove(new User { Id = user.Id });
@@ -84,7 +87,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
                 new User {Id = userId, FullName = "Mark Kramer"},
                 new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
             }, (x, _) => x.Id);
-            var dbSet = dbSetMock.Object;
+            var dbSet = dbSetMock.DbSet;
 
             Assert.That(dbSet.Count(), Is.EqualTo(2));
             var fetchedUser = dbSet.First(x => x.Id == userId);
@@ -110,15 +113,15 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         {
             var dbSetMock = new DbSetMock<NestedModel>(new[]
             {
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()}
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()}
             }, (x, _) => x.Id);
 
             SavedChangesEventArgs<NestedModel> eventArgs = null;
             dbSetMock.SavedChanges += (sender, args) => eventArgs = args;
 
-            dbSetMock.Object.First().Value = "abc";
+            dbSetMock.DbSet.First().Value = "abc";
 
             ((IDbSetMock)dbSetMock).SaveChanges();
 
@@ -138,7 +141,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             public string Value { get; set; }
 
             [NotMapped]
-            public Document NesteDocument
+            public Document NestedDocument
             {
                 get { return new Document { Name = Guid.NewGuid().ToString("N") }; }
                 // ReSharper disable once ValueParameterNotUsed
