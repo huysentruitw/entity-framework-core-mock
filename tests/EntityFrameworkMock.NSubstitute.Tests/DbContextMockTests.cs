@@ -15,7 +15,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_Constructor_PassConnectionString_ShouldPassConnectionStringToMockedClass()
         {
-            var connectionString = Guid.NewGuid().ToString("N");
+            var connectionString = @"Server=myServerName\myInstanceName;Database=myDataBase;User Id=myUsername; Password = myPassword;";
             var dbContextMock = new DbContextMock<TestDbContext>(connectionString);
             Assert.That(dbContextMock.DbContext.Database.Connection.ConnectionString, Is.EqualTo(connectionString));
         }
