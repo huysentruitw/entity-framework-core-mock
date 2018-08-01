@@ -11,39 +11,42 @@ namespace EntityFrameworkMock.NSubstitute
         where TEntity : class
     {
         private readonly DbSetBackingStore<TEntity> _store;
-        private readonly DbSet<TEntity> _dbSet;
+
+        public DbSet<TEntity> DbSet { get; }
 
         public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory, bool asyncQuerySupport = true)
         {
             _store = new DbSetBackingStore<TEntity>(initialEntities, keyFactory);
             
             var data = _store.GetDataAsQueryable();
-           
-            _dbSet = Substitute.ForPartsOf<DbSet<TEntity>>();
+
+            Func<DbAsyncEnumerable<TEntity>> getQuery = 
+                () => new DbAsyncEnumerable<TEntity>(data.AsQueryable());
+
+            DbSet = Substitute.For<DbSet<TEntity>, IQueryable<TEntity>, IDbAsyncEnumerable<TEntity>>();
             
-            _dbSet.AsQueryable().Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
-            _dbSet.AsQueryable().Expression.Returns(data.Expression);
-            _dbSet.AsQueryable().ElementType.Returns(data.ElementType);
-            _dbSet.AsQueryable().GetEnumerator().Returns(_store.GetDataEnumerator());
+            ((IQueryable<TEntity>)DbSet).Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
+            DbSet.AsQueryable().Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
+            DbSet.AsQueryable().Expression.Returns(data.Expression);
+            DbSet.AsQueryable().ElementType.Returns(data.ElementType);
+            DbSet.AsQueryable().GetEnumerator().Returns(_store.GetDataEnumerator());
 
             if (asyncQuerySupport)
             {
-                ((IDbAsyncEnumerable<TEntity>)_dbSet).GetAsyncEnumerator().Returns(new DbAsyncEnumerator<TEntity>(_store.GetDataEnumerator()));
+                ((IDbAsyncEnumerable<TEntity>)DbSet).GetAsyncEnumerator()
+                    .Returns(a => getQuery().GetAsyncEnumerator());
             }
-            _dbSet.AsNoTracking().Returns(_dbSet);
-            _dbSet.AsNoTracking().Include(Arg.Any<string>()).Returns(_dbSet);
 
-            _dbSet.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(1)));
-            _dbSet.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(1)));
-            _dbSet.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(1)));
-            _dbSet.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(1)));
+            DbSet.AsNoTracking().Returns(DbSet);
+            DbSet.Include(Arg.Any<string>()).Returns(DbSet);
+            DbSet.AsNoTracking().Include(Arg.Any<string>()).Returns(DbSet);
+
+            DbSet.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(0)));
+            //_dbSet.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
+            DbSet.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));
+            //_dbSet.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(0)));
            
             _store.UpdateSnapshot();
-        }
-
-        public IDbSet<TEntity> DbSet
-        {
-            get { return _dbSet; }
         }
 
         public event EventHandler<SavedChangesEventArgs<TEntity>> SavedChanges;

@@ -1,6 +1,7 @@
 ﻿using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
@@ -41,6 +42,32 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             ((IDbSetMock)dbSetMock).SaveChanges();
             Assert.That(dbSet.Count(), Is.EqualTo(1));
             Assert.That(dbSet.Any(x => x.Id == user.Id && x.FullName == user.FullName), Is.True);
+        }
+
+        [Test]
+        public void DbSetMock_GivenEntityRangeIsAdded_ShouldAddAfterCallingSaveChanges()
+        {
+            // Arrange
+            var users = new List<User>()
+            {
+                new User() { Id = Guid.NewGuid(), FullName = "Ian Kilmister" },
+                new User() { Id = Guid.NewGuid(), FullName = "Phil Taylor" },
+                new User() { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
+            };
+            var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
+            var dbSet = dbSetMock.DbSet;
+
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
+
+            // Act
+            dbSet.AddRange(users);
+            ((IDbSetMock)dbSetMock).SaveChanges();
+
+            // Assert            
+            var firstUser = users.First();
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            Assert.That(dbSet.Any(x => x.Id == firstUser.Id 
+                && x.FullName == firstUser.FullName), Is.True);
         }
 
         [Test]
