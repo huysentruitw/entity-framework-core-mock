@@ -28,8 +28,8 @@ namespace EntityFrameworkMock.NSubstitute
             ((IQueryable<TEntity>)DbSet).Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
             DbSet.AsQueryable().Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
             DbSet.AsQueryable().Expression.Returns(data.Expression);
-            DbSet.AsQueryable().ElementType.Returns(data.ElementType);
-            DbSet.AsQueryable().GetEnumerator().Returns(_store.GetDataEnumerator());
+            DbSet.AsQueryable().ElementType.Returns(data.ElementType);            
+            ((IQueryable<TEntity>)DbSet).GetEnumerator().Returns(a => _store.GetDataEnumerator());
 
             if (asyncQuerySupport)
             {

@@ -1,6 +1,7 @@
 ﻿using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -190,6 +191,42 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             Assert.That(dbSetMock.DbSet.First(x => x.Id == 2).Value, Is.EqualTo("second"));
             Assert.That(dbSetMock.DbSet.First(x => x.Id == 3).Value, Is.EqualTo("third"));
         }
+
+
+        [Test]
+        public void DbContextMock_MultipleGets_ShouldReturnDataEachTime()
+        {
+            // Arrange
+            var users = new List<User>()
+            {
+                new User() { Id = Guid.NewGuid(), FullName = "Ian Kilmister" },
+                new User() { Id = Guid.NewGuid(), FullName = "Phil Taylor" },
+                new User() { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
+            };
+
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            dbContextMock.CreateDbSetMock(x => x.Users, users);
+
+            List<string> results = new List<string>();
+
+            // Act
+            for (int i = 1; i <= 100; i++)
+            {
+                var readUsers = dbContextMock.DbContextObject.Users;
+                foreach (var user in readUsers)
+                {
+                    results.Add(user.FullName);
+                }
+            }
+
+            // Assert            
+            Assert.AreEqual(300, results.Count());
+            foreach (var result in results)
+            {
+                Assert.IsNotEmpty(result);
+            }
+        }
+
 
         public class TestDbSetMock : IDbSetMock
         {
