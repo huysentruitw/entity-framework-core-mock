@@ -227,7 +227,6 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             }
         }
 
-
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;

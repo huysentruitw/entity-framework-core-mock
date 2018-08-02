@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace EntityFrameworkMock.NSubstitute.Helpers
 {
-    public static class ReflectionHelper
+    internal static class ReflectionHelper
     {
         /// <summary>
         /// https://stackoverflow.com/questions/671968/retrieving-property-name-from-lambda-expression
         /// </summary>
-        public static PropertyInfo GetPropertyInfo<TSource, TProperty>(
+        internal static PropertyInfo GetPropertyInfo<TSource, TProperty>(
             TSource source,
             Expression<Func<TSource, TProperty>> propertyLambda)
         {
