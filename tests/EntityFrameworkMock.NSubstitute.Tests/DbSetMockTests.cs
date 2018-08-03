@@ -1,11 +1,11 @@
-﻿using EntityFrameworkMock.Tests.Models;
-using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using EntityFrameworkMock.Tests.Models;
+using NUnit.Framework;
 
 namespace EntityFrameworkMock.NSubstitute.Tests
 {
