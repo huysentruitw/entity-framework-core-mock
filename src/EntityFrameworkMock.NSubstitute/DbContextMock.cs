@@ -44,7 +44,7 @@ namespace EntityFrameworkMock.NSubstitute
 
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
-            DbSetMock<TEntity> mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
+            var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             DbContextObject.Set<TEntity>().Returns(mock.DbSet);
 
             var propertyInfo = Helpers.ReflectionHelper.GetPropertyInfo(DbContextObject, dbSetSelector);
