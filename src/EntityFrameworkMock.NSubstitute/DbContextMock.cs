@@ -47,8 +47,7 @@ namespace EntityFrameworkMock.NSubstitute
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             DbContextObject.Set<TEntity>().Returns(mock.DbSet);
 
-            var propertyInfo = Helpers.ReflectionHelper.GetPropertyInfo(DbContextObject, dbSetSelector);
-            propertyInfo.GetValue(DbContextObject).Returns(mock.DbSet);
+            dbSetSelector.Compile()(DbContextObject).Returns(mock.DbSet);
 
             _dbSetCache.Add(memberInfo, mock);
             return mock;
