@@ -14,12 +14,12 @@ namespace EntityFrameworkMock.NSubstitute
     {
         private readonly IKeyFactoryBuilder _keyFactoryBuilder;
         private readonly Dictionary<MemberInfo, IDbSetMock> _dbSetCache = new Dictionary<MemberInfo, IDbSetMock>();
+
         public TDbContext DbContextObject { get; set; }
 
         public DbContextMock(params object[] args)
             : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
         {
-
         }
 
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
@@ -31,14 +31,11 @@ namespace EntityFrameworkMock.NSubstitute
 
         public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null)
             where TEntity : class
-            => CreateDbSetMock(
-                dbSetSelector, 
-                _keyFactoryBuilder.BuildKeyFactory<TEntity>(),                 
-                initialEntities);
+            => CreateDbSetMock(dbSetSelector, _keyFactoryBuilder.BuildKeyFactory<TEntity>(), initialEntities);
 
         public DbSetMock<TEntity> CreateDbSetMock<TEntity>(
-            Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, 
-            Func<TEntity, KeyContext, object> entityKeyFactory,            
+            Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector,
+            Func<TEntity, KeyContext, object> entityKeyFactory,
             IEnumerable<TEntity> initialEntities = null)
             where TEntity : class
         {
@@ -64,7 +61,7 @@ namespace EntityFrameworkMock.NSubstitute
             DbContextObject.SaveChangesAsync().Returns(a => SaveChanges());
             DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
         }
-        
+
         public void RegisterDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IDbSetMock dbSet)
             where TEntity : class
         {
@@ -74,5 +71,4 @@ namespace EntityFrameworkMock.NSubstitute
 
         private int SaveChanges() => _dbSetCache.Values.Aggregate(0, (seed, dbSet) => seed + dbSet.SaveChanges());
     }
-
 }

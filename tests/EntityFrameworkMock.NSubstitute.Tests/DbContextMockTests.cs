@@ -137,7 +137,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_CustomKeyFactoryForModelWithoutKeyAttributes_ShouldNotThrowException()
         {
             var dbContextMock = new DbContextMock<TestDbContext>("abc");
-            Assert.DoesNotThrow(() => 
+            Assert.DoesNotThrow(() =>
                 dbContextMock.CreateDbSetMock(
                     x => x.NoKeyModels, (x, _) => x.Id));
         }
@@ -151,7 +151,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
             dbSetMock.DbSet.Add(new User { Id = userId, FullName = "SomeName" });
             dbSetMock.DbSet.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
-            dbContextMock.DbContextObject.SaveChanges();        
+            dbContextMock.DbContextObject.SaveChanges();
             dbSetMock.DbSet.Add(new User { Id = userId, FullName = "SomeName" });
 
             // Act

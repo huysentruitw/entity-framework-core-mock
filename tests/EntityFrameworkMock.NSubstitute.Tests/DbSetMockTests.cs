@@ -66,7 +66,7 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             // Assert            
             var firstUser = users.First();
             Assert.That(dbSet.Count(), Is.EqualTo(3));
-            Assert.That(dbSet.Any(x => x.Id == firstUser.Id 
+            Assert.That(dbSet.Any(x => x.Id == firstUser.Id
                 && x.FullName == firstUser.FullName), Is.True);
         }
 
