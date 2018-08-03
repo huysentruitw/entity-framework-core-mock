@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+	<Title>EntityFrameworkMock.NSubstitute</Title>
+	<Product>EntityFrameworkMock</Product>
+    <AssemblyName>EntityFrameworkMock.NSubstitute</AssemblyName>
+    <RootNamespace>EntityFrameworkMock.NSubstitute</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.2.1" />
+    <PackageReference Include="EntityFramework" Version="6.2.0" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EntityFrameworkMock.Shared\EntityFrameworkMock.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
