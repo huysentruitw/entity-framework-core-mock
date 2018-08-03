@@ -62,7 +62,8 @@ namespace EntityFrameworkMock.NSubstitute
             DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
         }
 
-        public void RegisterDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IDbSetMock dbSet)
+        // Facilitates unit-testing
+        internal void RegisterDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IDbSetMock dbSet)
             where TEntity : class
         {
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
