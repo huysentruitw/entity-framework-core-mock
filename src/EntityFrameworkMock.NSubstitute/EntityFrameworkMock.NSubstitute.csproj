@@ -1,11 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
-	<Title>EntityFrameworkMock.NSubstitute</Title>
-	<Product>EntityFrameworkMock</Product>
-    <AssemblyName>EntityFrameworkMock.NSubstitute</AssemblyName>
-    <RootNamespace>EntityFrameworkMock.NSubstitute</RootNamespace>
+    <TargetFramework>net452</TargetFramework>
+    <Title>EntityFrameworkMock.NSubstitute</Title>
+    <Product>EntityFrameworkMock</Product>
+    <Version>1.0.0.0</Version>
+    <Authors>Wouter Huysentruit, Paul Michaels</Authors>
+    <Company>EntityFrameworkMock</Company>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/huysentruitw/entity-framework-mock/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/huysentruitw/entity-framework-mock</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>Easy Mock wrapper for mocking EF6 DbContext and DbSet using NSubstitute</Description>
+    <Copyright>Copyright 2017-2018 Wouter Huysentruit, Paul Michaels</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

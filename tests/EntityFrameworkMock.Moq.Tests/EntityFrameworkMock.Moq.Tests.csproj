@@ -16,4 +16,4 @@
     <ProjectReference Include="..\..\src\EntityFrameworkMock.Moq\EntityFrameworkMock.Moq.csproj" />
   </ItemGroup>
   
-  </Project>
+</Project>
