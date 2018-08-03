@@ -2,17 +2,19 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/5ung41elf64ahshg/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/entity-framework-mock/branch/master)
 
-Easy Mock wrapper for mocking EF6 DbContext and DbSet using Moq
+Easy Mock wrapper for mocking EF6 DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
 
-## Get it on [NuGet](https://www.nuget.org/packages/EntityFrameworkMock/)
+## Get it on NuGet
 
-    PM> Install-Package EntityFrameworkMock
+### Moq integration
 
-## Description
+    PM> Install-Package EntityFrameworkMock.Moq
 
-This library contains a DbContext and DbSet wrapper based on the Moq framework.
+### NSubstitute integration
 
-Supports:
+    PM> Install-Package EntityFrameworkMock.NSubstitute
+
+## Supports
 
 * In-memory storage of test data
 * Querying of in-memory test data (synchronous or asynchronous)
@@ -23,7 +25,7 @@ Supports:
 * Throwing a `DbUpdateException` when inserting 2 or more entities with the same primary key while calling `SaveChanges` / `SaveChangesAsync` (emulating EF behavior)
 * Throwing a `DbUpdateConcurrencyException` when removing a model that no longer exists (emulating EF behavior)
 
-Since both, `DbSetMock` and `DbContextMock` inherit from `Mock<DbSet>` and `Mock<DbContext>` respectively, you can use all known [Moq](https://github.com/Moq/moq4/wiki/Quickstart) features.
+For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wiki/Quickstart) features, since both `DbSetMock` and `DbContextMock` inherit from `Mock<DbSet>` and `Mock<DbContext>` respectively.
 
 ## Example usage
 
