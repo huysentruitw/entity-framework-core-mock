@@ -26,7 +26,7 @@ using Moq;
 
 namespace EntityFrameworkMock
 {
-    public sealed class DbContextMock<TDbContext> : Mock<TDbContext>
+    public class DbContextMock<TDbContext> : Mock<TDbContext>
         where TDbContext : DbContext
     {
         private readonly IKeyFactoryBuilder _keyFactoryBuilder;

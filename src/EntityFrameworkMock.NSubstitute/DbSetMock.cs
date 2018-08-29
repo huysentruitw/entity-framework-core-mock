@@ -23,7 +23,7 @@ using NSubstitute;
 
 namespace EntityFrameworkMock.NSubstitute
 {
-    public sealed class DbSetMock<TEntity> : IDbSetMock
+    public class DbSetMock<TEntity> : IDbSetMock
         where TEntity : class
     {
         private readonly DbSetBackingStore<TEntity> _store;
