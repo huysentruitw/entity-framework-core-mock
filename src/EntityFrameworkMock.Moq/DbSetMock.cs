@@ -23,7 +23,7 @@ using Moq;
 
 namespace EntityFrameworkMock
 {
-    public sealed class DbSetMock<TEntity> : Mock<DbSet<TEntity>>, IDbSetMock
+    public class DbSetMock<TEntity> : Mock<DbSet<TEntity>>, IDbSetMock
         where TEntity : class
     {
         private readonly DbSetBackingStore<TEntity> _store;
