@@ -1,18 +1,16 @@
-# EntityFrameworkMock
+# EntityFrameworkCoreMock
 
-[![Build status](https://ci.appveyor.com/api/projects/status/5ung41elf64ahshg/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/entity-framework-mock/branch/master)
-
-Easy Mock wrapper for mocking EF6 DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
+Easy Mock wrapper for mocking EntityFrameworkCore (EFCore) DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
 
 ## Get it on NuGet
 
 ### Moq integration
 
-    PM> Install-Package EntityFrameworkMock.Moq
+    PM> Install-Package EntityFrameworkCoreMock.Moq
 
 ### NSubstitute integration
 
-    PM> Install-Package EntityFrameworkMock.NSubstitute
+    PM> Install-Package EntityFrameworkCoreMock.NSubstitute
 
 ## Supports
 
@@ -39,8 +37,8 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
 
     public class TestDbContext : DbContext
     {
-        public TestDbContext(string connectionString)
-            : base(connectionString)
+        public TestDbContext(DbContextOptions<TestDbContext> options)
+            : base(options)
         {
         }
 
