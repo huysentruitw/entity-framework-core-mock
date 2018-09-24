@@ -15,21 +15,18 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_Constructor_PassDbContextOptions_ShouldPassDbContextOptionsToMockedClass()
         {
-            // Arrange
-            var options = new DbContextOptions<TestDbContext>();
-
             // Act
-            var dbContextMock = new DbContextMock<TestDbContext>(options);
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
 
             // Assert
-            Assert.That(dbContextMock.DbContextObject.Options, Is.EqualTo(options));
+            Assert.That(dbContextMock.DbContextObject.Options, Is.EqualTo(Options));
         }
 
         [Test]
         public async Task DbContextMock_Constructor_ShouldSetupSaveChanges()
         {
             // Arrange
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
 
             // Act
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
@@ -44,7 +41,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_Reset_ShouldForgetMockedDbSets()
         {
             // Arrange
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
             Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
 
@@ -59,7 +56,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_Reset_ShouldResetupSaveChanges()
         {
             // Arrange
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
             Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
             dbContextMock.Reset();
@@ -76,7 +73,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_CreateIdenticalDbSetMockTwice_ShouldThrowExceptionSecondTime()
         {
             // Arrange
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.CreateDbSetMock(x => x.Users);
 
             // Act
@@ -94,7 +91,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_CreateDbSetMock_ShouldSetupMockForDbSetSelector()
         {
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.That(dbContextMock.DbContextObject.Users, Is.Null);
             dbContextMock.CreateDbSetMock<User>(x => x.Users);
             Assert.That(dbContextMock.DbContextObject.Users, Is.Not.Null);
@@ -104,7 +101,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public async Task DbContextMock_CreateDbSetMock_PassInitialEntities_DbSetShouldContainInitialEntities()
         {
             // Arrange
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
 
             // Act
             dbContextMock.CreateDbSetMock(x => x.Users, new[]
@@ -127,7 +124,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_CreateDbSetMock_NoKeyFactoryForModelWithoutKeyAttributes_ShouldThrowException()
         {
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var ex = Assert.Throws<InvalidOperationException>(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels));
             Assert.That(ex.Message, Is.EqualTo("Entity type NoKeyModel does not contain any property marked with KeyAttribute"));
         }
@@ -135,7 +132,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_CreateDbSetMock_CustomKeyFactoryForModelWithoutKeyAttributes_ShouldNotThrowException()
         {
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() =>
                 dbContextMock.CreateDbSetMock(
                     x => x.NoKeyModels, (x, _) => x.Id));
@@ -146,7 +143,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
             dbSetMock.DbSet.Add(new User { Id = userId, FullName = "SomeName" });
             dbSetMock.DbSet.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
@@ -166,7 +163,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_CreateDbSetMock_DeleteUnknownModel_ShouldThrowDbUpdateConcurrencyException()
         {
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
             dbSetMock.DbSet.Remove(new User { Id = Guid.NewGuid() });
             Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.DbContextObject.SaveChanges());
@@ -175,7 +172,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public void DbContextMock_CreateDbSetMock_AddMultipleModelsWithDatabaseGeneratedIdentityKey_ShouldGenerateSequentialKey()
         {
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.GeneratedKeyModels, new[]
             {
                 new GeneratedKeyModel {Value = "first"},
@@ -203,7 +200,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
                 new User() { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
             };
 
-            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.CreateDbSetMock(x => x.Users, users);
 
             List<string> results = new List<string>();
@@ -231,15 +228,19 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             public int SaveChanges() => 55861;
         }
 
+        public DbContextOptions Options { get; } = new DbContextOptionsBuilder()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
         public class TestDbContext : DbContext
         {
-            public TestDbContext(DbContextOptions<TestDbContext> options)
+            public TestDbContext(DbContextOptions options)
                 : base(options)
             {
                 Options = options;
             }
 
-            public DbContextOptions<TestDbContext> Options { get; }
+            public DbContextOptions Options { get; }
 
             public virtual DbSet<User> Users { get; set; }
 
