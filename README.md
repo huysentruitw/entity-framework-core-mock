@@ -22,6 +22,9 @@ Easy Mock wrapper for mocking EntityFrameworkCore (EFCore) DbContext and DbSet i
 * Emulation of `SaveChanges` and `SaveChangesAsync` (only saves tracked changes to the mocked in-memory DbSet when one of these methods are called)
 * Auto-increment identity columns, annotated by the `[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]` attribute
 * Primary key on multiple columns, annotated by the `[Key, Column(Order = X)]` attributes
+
+## TODO
+
 * Throwing a `DbUpdateException` when inserting 2 or more entities with the same primary key while calling `SaveChanges` / `SaveChangesAsync` (emulating EF behavior)
 * Throwing a `DbUpdateConcurrencyException` when removing a model that no longer exists (emulating EF behavior)
 
