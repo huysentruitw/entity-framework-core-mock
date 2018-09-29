@@ -12,19 +12,19 @@ namespace EntityFrameworkCoreMock.Tests
     public class DbSetMockTests
     {
         [Test]
-        public void DbSetMock_AsNoTracking_ShouldBeMocked()
+        public void DbSetMock_AsNoTracking_ShouldForwardProvider()
         {
             var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
-            Assert.That(dbSet.AsNoTracking(), Is.EqualTo(dbSet));
+            Assert.That(dbSet.AsNoTracking().Provider, Is.EqualTo(((IQueryable<Order>)dbSet).Provider));
         }
 
         [Test]
-        public void DbSetMock_Include_ShouldBeMocked()
+        public void DbSetMock_Include_ShouldForwardProvider()
         {
             var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
-            Assert.That(dbSet.Include(x => x.User), Is.EqualTo(dbSet));
+            Assert.That(dbSet.Include(x => x.User).Provider, Is.EqualTo(((IQueryable<Order>)dbSet).Provider));
         }
 
         [Test]

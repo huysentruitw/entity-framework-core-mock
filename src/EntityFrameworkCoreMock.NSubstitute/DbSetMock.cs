@@ -48,10 +48,6 @@ namespace EntityFrameworkCoreMock.NSubstitute
                 ((IAsyncEnumerable<TEntity>)DbSet).GetEnumerator().Returns(a => new DbAsyncEnumerator<TEntity>(_store.GetDataEnumerator()));
             }
 
-            DbSet.AsNoTracking().Returns(DbSet);
-            DbSet.Include(Arg.Any<string>()).Returns(DbSet);
-            DbSet.AsNoTracking().Include(Arg.Any<string>()).Returns(DbSet);
-
             DbSet.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(0)));
             DbSet.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
             DbSet.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));

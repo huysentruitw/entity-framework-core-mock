@@ -40,7 +40,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
 
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
         {
-            DbContextObject = Substitute.ForPartsOf<TDbContext>(args);
+            DbContextObject = Substitute.For<TDbContext>(args);
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
             Reset();
         }
@@ -72,9 +72,11 @@ namespace EntityFrameworkCoreMock.NSubstitute
         public void Reset()
         {
             _dbSetCache.Clear();
-            DbContextObject.SaveChanges().Returns(a => SaveChanges());
-            DbContextObject.SaveChangesAsync().Returns(a => SaveChanges());
-            DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
+            DbContextObject.ClearReceivedCalls();
+            DbContextObject.SaveChanges().Returns(_ => SaveChanges());
+            DbContextObject.SaveChanges(Arg.Any<bool>()).Returns(_ => SaveChanges());
+            DbContextObject.SaveChangesAsync().Returns(_ => SaveChanges());
+            DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(_ => SaveChanges());
         }
 
         // Facilitates unit-testing

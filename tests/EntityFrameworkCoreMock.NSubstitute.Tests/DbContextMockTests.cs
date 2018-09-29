@@ -33,6 +33,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
 
             // Assert
             Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
+            Assert.That(dbContextMock.DbContextObject.SaveChanges(true), Is.EqualTo(55861));
             Assert.That(await dbContextMock.DbContextObject.SaveChangesAsync(), Is.EqualTo(55861));
             Assert.That(await dbContextMock.DbContextObject.SaveChangesAsync(CancellationToken.None), Is.EqualTo(55861));
         }
@@ -92,8 +93,8 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_ShouldSetupMockForDbSetSelector()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            Assert.That(dbContextMock.DbContextObject.Users, Is.Null);
-            dbContextMock.CreateDbSetMock<User>(x => x.Users);
+            Assert.Throws<NotImplementedException>(() => dbContextMock.DbContextObject.Users.ToArray());
+            dbContextMock.CreateDbSetMock(x => x.Users);
             Assert.That(dbContextMock.DbContextObject.Users, Is.Not.Null);
         }
 
@@ -138,7 +139,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
                     x => x.NoKeyModels, (x, _) => x.Id));
         }
 
-        [Test]
+        [Ignore("Not yet ported to EntityFrameworkCoreMock")]
         public void DbContextMock_CreateDbSetMock_AddModelWithSameKeyTwice_ShouldThrowDbUpdatedException()
         {
             // Arrange
@@ -160,7 +161,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.Throws<DbUpdateException>(CallSaveChanges);
         }
 
-        [Test]
+        [Ignore("Not yet ported to EntityFrameworkCoreMock")]
         public void DbContextMock_CreateDbSetMock_DeleteUnknownModel_ShouldThrowDbUpdateConcurrencyException()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);

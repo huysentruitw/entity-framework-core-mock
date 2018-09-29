@@ -17,7 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Moq;
 
 namespace EntityFrameworkCoreMock
@@ -37,17 +40,17 @@ namespace EntityFrameworkCoreMock
             As<IQueryable<TEntity>>().Setup(x => x.ElementType).Returns(data.ElementType);
             As<IQueryable<TEntity>>().Setup(x => x.GetEnumerator()).Returns(() => _store.GetDataEnumerator());
             if (asyncQuerySupport) As<IAsyncEnumerable<TEntity>>().Setup(x => x.GetEnumerator()).Returns(() => new DbAsyncEnumerator<TEntity>(_store.GetDataEnumerator()));
-            Setup(x => x.AsNoTracking()).Returns(() => Object);
-            Setup(x => x.Include(It.IsAny<string>())).Returns(() => Object);
+            //Setup(x => x.AsNoTracking()).Returns(() => Object);
+            //Setup(x => x.Include(It.IsAny<string>())).Returns(() => Object);
 
             Setup(x => x.Add(It.IsAny<TEntity>())).Callback<TEntity>(_store.Add);
             Setup(x => x.AddRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Add);
             Setup(x => x.Remove(It.IsAny<TEntity>())).Callback<TEntity>(_store.Remove);
             Setup(x => x.RemoveRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Remove);
 
-            //Setup(x => x.AddAsync(It.IsAny<TEntity>(), It.IsAny<CancellationToken>())).Callback<TEntity, CancellationToken>((x, _) => _operations.Add(DbSetOperation.Add(x))).ReturnsAsync(default(EntityEntry<TEntity>));
-            //Setup(x => x.AddRangeAsync(It.IsAny<TEntity[]>())).Callback<TEntity[]>(x => _operations.AddRange(DbSetOperation.Add(x))).Returns(Task.CompletedTask);
-            //Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TEntity>>(), It.IsAny<CancellationToken>())).Callback<IEnumerable<TEntity>, CancellationToken>((x, _) => _operations.AddRange(DbSetOperation.Add(x))).Returns(Task.CompletedTask);
+            Setup(x => x.AddAsync(It.IsAny<TEntity>(), It.IsAny<CancellationToken>())).Callback<TEntity, CancellationToken>((x, _) => _store.Add(x)).ReturnsAsync(default(EntityEntry<TEntity>));
+            Setup(x => x.AddRangeAsync(It.IsAny<TEntity[]>())).Callback<TEntity[]>(x => _store.Add(x)).Returns(Task.CompletedTask);
+            Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TEntity>>(), It.IsAny<CancellationToken>())).Callback<IEnumerable<TEntity>, CancellationToken>((x, _) => _store.Add(x)).Returns(Task.CompletedTask);
 
             _store.UpdateSnapshot();
         }
