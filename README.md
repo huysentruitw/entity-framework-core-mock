@@ -59,7 +59,7 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
                 new User { Id = Guid.NewGuid(), FullName = "Billy Jewel" },
             };
             
-        var dbContextMock = new DbContextMock<TestDbContext>("fake connectionstring");
+        var dbContextMock = new DbContextMock<TestDbContext>(DummyOptions);
         var usersDbSetMock = dbContextMock.CreateDbSetMock(x => x.Users, initialEntities);
         
         // Pass dbContextMock.Object to the class/method you want to test
@@ -67,3 +67,5 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
         // Query dbContextMock.Object.Users to see if certain users were added or removed
         // or use Mock Verify functionality to verify if certain methods were called: usersDbSetMock.Verify(x => x.Add(...), Times.Once);
     }
+
+    public DbContextOptions DummyOptions { get; } = new DbContextOptionsBuilder().Options;
