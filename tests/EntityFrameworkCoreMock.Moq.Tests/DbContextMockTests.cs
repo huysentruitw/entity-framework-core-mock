@@ -145,6 +145,16 @@ namespace EntityFrameworkCoreMock.Tests
             Assert.That(dbSetMock.Object.First(x => x.Id == 3).Value, Is.EqualTo("third"));
         }
 
+        [Test]
+        public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
+            var dbSet = dbContextMock.Object.Set<User>();
+            Assert.That(dbSet, Is.Not.Null);
+            Assert.That(dbSet, Is.EqualTo(dbSetMock.Object));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
