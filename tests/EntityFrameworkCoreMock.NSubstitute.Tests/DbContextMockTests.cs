@@ -239,9 +239,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             public int SaveChanges() => 55861;
         }
 
-        public DbContextOptions Options { get; } = new DbContextOptionsBuilder()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
 
         public class TestDbContext : DbContext
         {

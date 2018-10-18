@@ -68,4 +68,4 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
         // or use Mock Verify functionality to verify if certain methods were called: usersDbSetMock.Verify(x => x.Add(...), Times.Once);
     }
 
-    public DbContextOptions DummyOptions { get; } = new DbContextOptionsBuilder().Options;
+    public DbContextOptions<TestDbContext> DummyOptions { get; } = new DbContextOptionsBuilder<TestDbContext>().Options;

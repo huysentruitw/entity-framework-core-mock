@@ -78,6 +78,27 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+        public void DbSetMock_GivenRangeOfEntitiesIsRemoved_ShouldRemoveAfterCallingSaveChanges()
+        {
+            var users = new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "User 1"},
+                new User {Id = Guid.NewGuid(), FullName = "User 2"},
+                new User {Id = Guid.NewGuid(), FullName = "User 3"}
+            };
+            var dbSetMock = new DbSetMock<User>(users, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            dbSet.RemoveRange(users.Skip(1));
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            ((IDbSetMock)dbSetMock).SaveChanges();
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            Assert.That(dbSet.Any(x => x.FullName == "User 1"), Is.True);
+            Assert.That(dbSet.Any(x => x.FullName == "User 2"), Is.False);
+        }
+
+        [Test]
         public void DbSetMock_SaveChanges_GivenEntityPropertyIsChanged_ShouldFireSavedChangesEventWithCorrectUpdatedInfo()
         {
             var userId = Guid.NewGuid();
