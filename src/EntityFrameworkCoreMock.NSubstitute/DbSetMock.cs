@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -41,11 +42,12 @@ namespace EntityFrameworkCoreMock.NSubstitute
             DbSet.AsQueryable().Provider.Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);
             DbSet.AsQueryable().Expression.Returns(data.Expression);
             DbSet.AsQueryable().ElementType.Returns(data.ElementType);
-            ((IQueryable<TEntity>)DbSet).GetEnumerator().Returns(a => _store.GetDataEnumerator());
+            ((IQueryable<TEntity>)DbSet).GetEnumerator().Returns(a => data.GetEnumerator());
+            ((IEnumerable)DbSet).GetEnumerator().Returns(a => data.GetEnumerator());
 
             if (asyncQuerySupport)
             {
-                ((IAsyncEnumerable<TEntity>)DbSet).GetEnumerator().Returns(a => new DbAsyncEnumerator<TEntity>(_store.GetDataEnumerator()));
+                ((IAsyncEnumerable<TEntity>)DbSet).GetEnumerator().Returns(a => new DbAsyncEnumerator<TEntity>(data.GetEnumerator()));
             }
 
             DbSet.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(0)));

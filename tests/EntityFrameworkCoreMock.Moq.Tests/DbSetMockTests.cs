@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -133,9 +134,9 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbSetMock = new DbSetMock<NestedModel>(new[]
             {
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()},
-                new NestedModel {Id = Guid.NewGuid(), NesteDocument = new NestedModel.Document()}
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()}
             }, (x, _) => x.Id);
 
             SavedChangesEventArgs<NestedModel> eventArgs = null;
@@ -154,6 +155,28 @@ namespace EntityFrameworkCoreMock.Tests
             Assert.That(updatedProperty.New, Is.EqualTo("abc"));
         }
 
+        [Test]
+        public void DbSetMock_Empty_AsEnumerable_ShouldReturnEmptyEnumerable()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new List<NestedModel>(), (x, _) => x.Id);
+            var nestedModels = dbSetMock.Object.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels, Is.Empty);
+        }
+
+        [Test]
+        public void DbSetMock_AsEnumerable_ShouldReturnEnumerableCollection()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new[]
+            {
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()}
+            }, (x, _) => x.Id);
+            var nestedModels = dbSetMock.Object.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels.Count(), Is.EqualTo(2));
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }
@@ -161,7 +184,7 @@ namespace EntityFrameworkCoreMock.Tests
             public string Value { get; set; }
 
             [NotMapped]
-            public Document NesteDocument
+            public Document NestedDocument
             {
                 get { return new Document { Name = Guid.NewGuid().ToString("N") }; }
                 // ReSharper disable once ValueParameterNotUsed

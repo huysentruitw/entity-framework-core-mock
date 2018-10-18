@@ -182,6 +182,28 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.That(updatedProperty.New, Is.EqualTo("abc"));
         }
 
+        [Test]
+        public void DbSetMock_Empty_AsEnumerable_ShouldReturnEmptyEnumerable()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new List<NestedModel>(), (x, _) => x.Id);
+            var nestedModels = dbSetMock.DbSet.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels, Is.Empty);
+        }
+
+        [Test]
+        public void DbSetMock_AsEnumerable_ShouldReturnEnumerableCollection()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new[]
+            {
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()}
+            }, (x, _) => x.Id);
+            var nestedModels = dbSetMock.DbSet.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels.Count(), Is.EqualTo(2));
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }
