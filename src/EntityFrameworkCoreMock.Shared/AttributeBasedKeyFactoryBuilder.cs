@@ -46,24 +46,41 @@ namespace EntityFrameworkCoreMock
             if (keyProperty == null) return null;
             var databaseGeneratedAttribute = keyProperty.GetCustomAttribute(typeof(DatabaseGeneratedAttribute)) as DatabaseGeneratedAttribute;
             if (databaseGeneratedAttribute?.DatabaseGeneratedOption != DatabaseGeneratedOption.Identity) return null;
-            if (!typeof(long).IsAssignableFrom(keyProperty.PropertyType)) return null;
 
             var entityArgument = Expression.Parameter(typeof(T));
             var keyContextArgument = Expression.Parameter(typeof(KeyContext));
-            var keyValueVariable = Expression.Variable(typeof(long));
 
+            if (keyProperty.PropertyType == typeof(long))
+            {
+                return BuildIdentityKeyFactory<T, long>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
+            }
+            else if (keyProperty.PropertyType == typeof(Guid))
+            {
+                return BuildIdentityKeyFactory<T, Guid>(keyProperty, _ => Expression.Call(typeof(Guid), nameof(Guid.NewGuid), Array.Empty<Type>()));
+            }
+
+            return null;
+        }
+
+        private static Func<TEntity, KeyContext, object> BuildIdentityKeyFactory<TEntity, TKey>(
+            PropertyInfo keyProperty,
+            Func<ParameterExpression, Expression> nextIdentity)
+        {
+            var entityArgument = Expression.Parameter(typeof(TEntity));
+            var keyContextArgument = Expression.Parameter(typeof(KeyContext));
+            var keyValueVariable = Expression.Variable(typeof(TKey));
             var body = Expression.Block(typeof(object),
                 new[] { keyValueVariable },
-                Expression.Assign(keyValueVariable, Expression.Convert(Expression.Property(entityArgument, keyProperty), typeof(long))),
-                Expression.IfThen(Expression.Equal(keyValueVariable, Expression.Constant(0L)),
+                Expression.Assign(keyValueVariable, Expression.Convert(Expression.Property(entityArgument, keyProperty), typeof(TKey))),
+                Expression.IfThen(Expression.Equal(keyValueVariable, Expression.Default(typeof(TKey))),
                     Expression.Block(
-                        Expression.Assign(keyValueVariable, Expression.Property(keyContextArgument, nameof(KeyContext.NextIdentity))),
+                        Expression.Assign(keyValueVariable, nextIdentity(keyContextArgument)),
                         Expression.Assign(Expression.Property(entityArgument, keyProperty), keyValueVariable)
                     )
                 ),
                 Expression.Convert(keyValueVariable, typeof(object)));
 
-            return Expression.Lambda<Func<T, KeyContext, object>>(body, entityArgument, keyContextArgument).Compile();
+            return Expression.Lambda<Func<TEntity, KeyContext, object>>(body, entityArgument, keyContextArgument).Compile();
         }
 
         private static Func<T, KeyContext, object> BuildDefaultKeyFactory<T>(PropertyInfo[] keyProperties)

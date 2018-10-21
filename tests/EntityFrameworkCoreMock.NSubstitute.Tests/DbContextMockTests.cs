@@ -189,6 +189,23 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.That(dbSetMock.DbSet.First(x => x.Id == 3).Value, Is.EqualTo("third"));
         }
 
+        [Test]
+        public void DbContextMock_CreateDbSetMock_AddMultipleModelsWithGuidAsDatabaseGeneratedIdentityKey_ShouldGenerateRandomGuidAsKey()
+        {
+            var knownId = Guid.NewGuid();
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.GeneratedGuidKeyModels, new[]
+            {
+                new GeneratedGuidKeyModel {Id = knownId, Value = "first"},
+                new GeneratedGuidKeyModel {Value = "second"}
+            });
+            dbSetMock.DbSet.Add(new GeneratedGuidKeyModel { Value = "third" });
+            dbContextMock.DbContextObject.SaveChanges();
+
+            var modelWithKnownId = dbSetMock.DbSet.FirstOrDefault(x => x.Id == knownId);
+            Assert.That(modelWithKnownId, Is.Not.Null);
+            Assert.That(modelWithKnownId.Value, Is.EqualTo("first"));
+        }
 
         [Test]
         public void DbContextMock_MultipleGets_ShouldReturnDataEachTime()
@@ -256,6 +273,8 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             public virtual DbSet<NoKeyModel> NoKeyModels { get; set; }
 
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
+
+            public virtual DbSet<GeneratedGuidKeyModel> GeneratedGuidKeyModels { get; set; }
         }
     }
 }
