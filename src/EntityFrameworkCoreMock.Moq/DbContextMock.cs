@@ -31,6 +31,7 @@ namespace EntityFrameworkCoreMock
     {
         private readonly IKeyFactoryBuilder _keyFactoryBuilder;
         private readonly Dictionary<MemberInfo, IDbSetMock> _dbSetCache = new Dictionary<MemberInfo, IDbSetMock>();
+        private readonly Dictionary<MemberInfo, IDbQueryMock> _dbQueryCache = new Dictionary<MemberInfo, IDbQueryMock>();
 
         public DbContextMock(params object[] args)
             : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
@@ -63,10 +64,25 @@ namespace EntityFrameworkCoreMock
             return mock;
         }
 
+        public DbQueryMock<TEntity> CreateDbQueryMock<TEntity>(Expression<Func<TDbContext, DbQuery<TEntity>>> dbQuerySelector, IEnumerable<TEntity> entities = null)
+            where TEntity : class
+        {
+            if (dbQuerySelector == null) throw new ArgumentNullException(nameof(dbQuerySelector));
+
+            var memberInfo = ((MemberExpression)dbQuerySelector.Body).Member;
+            if (_dbQueryCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbQueryMock for {memberInfo.Name} already created", nameof(dbQuerySelector));
+            var mock = new DbQueryMock<TEntity>(entities);
+            Setup(dbQuerySelector).Returns(() => mock.Object);
+            Setup(x => x.Query<TEntity>()).Returns(() => mock.Object);
+            _dbQueryCache.Add(memberInfo, mock);
+            return mock;
+        }
+
         public void Reset()
         {
             MockExtensions.Reset(this);
             _dbSetCache.Clear();
+            _dbQueryCache.Clear();
             Setup(x => x.SaveChanges()).Returns(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
@@ -78,6 +94,14 @@ namespace EntityFrameworkCoreMock
         {
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             _dbSetCache.Add(memberInfo, dbSet);
+        }
+
+        // Facilitates unit-testing
+        internal void RegisterDbQueryMock<TEntity>(Expression<Func<TDbContext, DbQuery<TEntity>>> dbQuerySelector, IDbQueryMock dbQuery)
+            where TEntity : class
+        {
+            var memberInfo = ((MemberExpression)dbQuerySelector.Body).Member;
+            _dbQueryCache.Add(memberInfo, dbQuery);
         }
 
         private int SaveChanges() => _dbSetCache.Values.Aggregate(0, (seed, dbSet) => seed + dbSet.SaveChanges());

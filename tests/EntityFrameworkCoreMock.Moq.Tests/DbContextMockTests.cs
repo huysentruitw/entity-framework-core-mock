@@ -173,9 +173,53 @@ namespace EntityFrameworkCoreMock.Tests
             Assert.That(dbSet, Is.EqualTo(dbSetMock.Object));
         }
 
+        [Test]
+        public void DbContextMock_Reset_ShouldForgetMockedDbQueries()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            dbContextMock.RegisterDbQueryMock(x => x.QueryModels, new TestDbQueryMock());
+            Assert.Throws<ArgumentException>(() => dbContextMock.RegisterDbQueryMock(x => x.QueryModels, new TestDbQueryMock()));
+            dbContextMock.Reset();
+            dbContextMock.RegisterDbQueryMock(x => x.QueryModels, new TestDbQueryMock());
+        }
+
+        [Test]
+        public void DbContextMock_CreateDbQueryMock_ShouldSetupMockForDbQuerySelector()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbQueryMock = dbContextMock.CreateDbQueryMock(x => x.QueryModels);
+            var dbQuery = dbContextMock.Object.Query<QueryModel>();
+            Assert.That(dbQuery, Is.Not.Null);
+            Assert.That(dbQuery, Is.EqualTo(dbQueryMock.Object));
+        }
+
+        [Test]
+        public async Task DbContextMock_CreateDbQueryMock_PassEntities_DbQueryShouldContainEntities()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            dbContextMock.CreateDbQueryMock(x => x.QueryModels, new[]
+            {
+                new QueryModel { ArticleCount = 2, AuthorName = "Author 1" },
+                new QueryModel { ArticleCount = 5, AuthorName = "Author 2" },
+            });
+
+            Assert.That(dbContextMock.Object.QueryModels.Count(), Is.EqualTo(2));
+            Assert.That(await dbContextMock.Object.QueryModels.CountAsync(), Is.EqualTo(2));
+
+            var result = await dbContextMock.Object.QueryModels.FirstAsync(x => x.AuthorName.Equals("Author 1"));
+            Assert.That(result.ArticleCount, Is.EqualTo(2));
+
+            result = await dbContextMock.Object.Query<QueryModel>().FirstAsync(x => x.AuthorName.Equals("Author 2"));
+            Assert.That(result.ArticleCount, Is.EqualTo(5));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
+        }
+
+        public class TestDbQueryMock : IDbQueryMock
+        {
         }
 
         public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
@@ -197,6 +241,8 @@ namespace EntityFrameworkCoreMock.Tests
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
 
             public virtual DbSet<GeneratedGuidKeyModel> GeneratedGuidKeyModels { get; set; }
+
+            public virtual DbQuery<QueryModel> QueryModels { get; set; }
         }
     }
 }
