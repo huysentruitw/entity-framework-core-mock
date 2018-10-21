@@ -19,7 +19,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
 
             // Assert
-            Assert.That(dbContextMock.DbContextObject.Options, Is.EqualTo(Options));
+            Assert.That(dbContextMock.Object.Options, Is.EqualTo(Options));
         }
 
         [Test]
@@ -32,10 +32,10 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
 
             // Assert
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(true), Is.EqualTo(55861));
-            Assert.That(await dbContextMock.DbContextObject.SaveChangesAsync(), Is.EqualTo(55861));
-            Assert.That(await dbContextMock.DbContextObject.SaveChangesAsync(CancellationToken.None), Is.EqualTo(55861));
+            Assert.That(dbContextMock.Object.SaveChanges(), Is.EqualTo(55861));
+            Assert.That(dbContextMock.Object.SaveChanges(true), Is.EqualTo(55861));
+            Assert.That(await dbContextMock.Object.SaveChangesAsync(), Is.EqualTo(55861));
+            Assert.That(await dbContextMock.Object.SaveChangesAsync(CancellationToken.None), Is.EqualTo(55861));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             // Arrange
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
+            Assert.That(dbContextMock.Object.SaveChanges(), Is.EqualTo(55861));
 
             // Act
             dbContextMock.Reset();
@@ -59,15 +59,15 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             // Arrange
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
+            Assert.That(dbContextMock.Object.SaveChanges(), Is.EqualTo(55861));
             dbContextMock.Reset();
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(0));
+            Assert.That(dbContextMock.Object.SaveChanges(), Is.EqualTo(0));
 
             // Act
             dbContextMock.RegisterDbSetMock(x => x.Users, new TestDbSetMock());
 
             // Assert
-            Assert.That(dbContextMock.DbContextObject.SaveChanges(), Is.EqualTo(55861));
+            Assert.That(dbContextMock.Object.SaveChanges(), Is.EqualTo(55861));
         }
 
         [Test]
@@ -93,9 +93,9 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_ShouldSetupMockForDbSetSelector()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            Assert.Throws<NotImplementedException>(() => dbContextMock.DbContextObject.Users.ToArray());
+            Assert.Throws<NotImplementedException>(() => dbContextMock.Object.Users.ToArray());
             dbContextMock.CreateDbSetMock(x => x.Users);
-            Assert.That(dbContextMock.DbContextObject.Users, Is.Not.Null);
+            Assert.That(dbContextMock.Object.Users, Is.Not.Null);
         }
 
         [Test]
@@ -112,13 +112,13 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             });
 
             // Assert
-            Assert.That(dbContextMock.DbContextObject.Users.Count(), Is.EqualTo(2));
-            Assert.That(await dbContextMock.DbContextObject.Users.CountAsync(), Is.EqualTo(2));
+            Assert.That(dbContextMock.Object.Users.Count(), Is.EqualTo(2));
+            Assert.That(await dbContextMock.Object.Users.CountAsync(), Is.EqualTo(2));
 
-            var result = await dbContextMock.DbContextObject.Users.FirstAsync(x => x.FullName.StartsWith("Eric"));
+            var result = await dbContextMock.Object.Users.FirstAsync(x => x.FullName.StartsWith("Eric"));
             Assert.That(result.FullName, Is.EqualTo("Eric Cartoon"));
 
-            result = dbContextMock.DbContextObject.Users.First(x => x.FullName.Contains("Jewel"));
+            result = dbContextMock.Object.Users.First(x => x.FullName.Contains("Jewel"));
             Assert.That(result.FullName, Is.EqualTo("Billy Jewel"));
         }
 
@@ -146,15 +146,15 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             var userId = Guid.NewGuid();
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.DbSet.Add(new User { Id = userId, FullName = "SomeName" });
-            dbSetMock.DbSet.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
-            dbContextMock.DbContextObject.SaveChanges();
-            dbSetMock.DbSet.Add(new User { Id = userId, FullName = "SomeName" });
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
+            dbSetMock.Object.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
+            dbContextMock.Object.SaveChanges();
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
 
             // Act
             void CallSaveChanges()
             {
-                dbContextMock.DbContextObject.SaveChanges();
+                dbContextMock.Object.SaveChanges();
             }
 
             // Assert
@@ -166,8 +166,8 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.DbSet.Remove(new User { Id = Guid.NewGuid() });
-            Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.DbContextObject.SaveChanges());
+            dbSetMock.Object.Remove(new User { Id = Guid.NewGuid() });
+            Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
         }
 
         [Test]
@@ -179,14 +179,14 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
                 new GeneratedKeyModel {Value = "first"},
                 new GeneratedKeyModel {Value = "second"}
             });
-            dbSetMock.DbSet.Add(new GeneratedKeyModel { Value = "third" });
-            dbContextMock.DbContextObject.SaveChanges();
+            dbSetMock.Object.Add(new GeneratedKeyModel { Value = "third" });
+            dbContextMock.Object.SaveChanges();
 
-            Assert.That(dbSetMock.DbSet.Min(x => x.Id), Is.EqualTo(1));
-            Assert.That(dbSetMock.DbSet.Max(x => x.Id), Is.EqualTo(3));
-            Assert.That(dbSetMock.DbSet.First(x => x.Id == 1).Value, Is.EqualTo("first"));
-            Assert.That(dbSetMock.DbSet.First(x => x.Id == 2).Value, Is.EqualTo("second"));
-            Assert.That(dbSetMock.DbSet.First(x => x.Id == 3).Value, Is.EqualTo("third"));
+            Assert.That(dbSetMock.Object.Min(x => x.Id), Is.EqualTo(1));
+            Assert.That(dbSetMock.Object.Max(x => x.Id), Is.EqualTo(3));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 1).Value, Is.EqualTo("first"));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 2).Value, Is.EqualTo("second"));
+            Assert.That(dbSetMock.Object.First(x => x.Id == 3).Value, Is.EqualTo("third"));
         }
 
         [Test]
@@ -199,10 +199,10 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
                 new GeneratedGuidKeyModel {Id = knownId, Value = "first"},
                 new GeneratedGuidKeyModel {Value = "second"}
             });
-            dbSetMock.DbSet.Add(new GeneratedGuidKeyModel { Value = "third" });
-            dbContextMock.DbContextObject.SaveChanges();
+            dbSetMock.Object.Add(new GeneratedGuidKeyModel { Value = "third" });
+            dbContextMock.Object.SaveChanges();
 
-            var modelWithKnownId = dbSetMock.DbSet.FirstOrDefault(x => x.Id == knownId);
+            var modelWithKnownId = dbSetMock.Object.FirstOrDefault(x => x.Id == knownId);
             Assert.That(modelWithKnownId, Is.Not.Null);
             Assert.That(modelWithKnownId.Value, Is.EqualTo("first"));
         }
@@ -226,7 +226,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             // Act
             for (int i = 1; i <= 100; i++)
             {
-                var readUsers = dbContextMock.DbContextObject.Users;
+                var readUsers = dbContextMock.Object.Users;
                 foreach (var user in readUsers)
                 {
                     results.Add(user.FullName);
@@ -246,9 +246,9 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            var dbSet = dbContextMock.DbContextObject.Set<User>();
+            var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet, Is.Not.Null);
-            Assert.That(dbSet, Is.EqualTo(dbSetMock.DbSet));
+            Assert.That(dbSet, Is.EqualTo(dbSetMock.Object));
         }
 
         [Test]

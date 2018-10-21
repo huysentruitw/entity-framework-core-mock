@@ -32,7 +32,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
         private readonly Dictionary<MemberInfo, IDbSetMock> _dbSetCache = new Dictionary<MemberInfo, IDbSetMock>();
         private readonly Dictionary<MemberInfo, IDbQueryMock> _dbQueryCache = new Dictionary<MemberInfo, IDbQueryMock>();
 
-        public TDbContext DbContextObject { get; set; }
+        public TDbContext Object { get; set; }
 
         public DbContextMock(params object[] args)
             : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
@@ -41,7 +41,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
 
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
         {
-            DbContextObject = Substitute.For<TDbContext>(args);
+            Object = Substitute.For<TDbContext>(args);
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
             Reset();
         }
@@ -62,9 +62,9 @@ namespace EntityFrameworkCoreMock.NSubstitute
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
-            DbContextObject.Set<TEntity>().Returns(mock.DbSet);
+            Object.Set<TEntity>().Returns(mock.Object);
 
-            dbSetSelector.Compile()(DbContextObject).Returns(mock.DbSet);
+            dbSetSelector.Compile()(Object).Returns(mock.Object);
 
             _dbSetCache.Add(memberInfo, mock);
             return mock;
@@ -78,9 +78,9 @@ namespace EntityFrameworkCoreMock.NSubstitute
             var memberInfo = ((MemberExpression)dbQuerySelector.Body).Member;
             if (_dbQueryCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbQueryMock for {memberInfo.Name} already created", nameof(dbQuerySelector));
             var mock = new DbQueryMock<TEntity>(entities);
-            DbContextObject.Query<TEntity>().Returns(mock.DbQuery);
+            Object.Query<TEntity>().Returns(mock.Object);
 
-            dbQuerySelector.Compile()(DbContextObject).Returns(mock.DbQuery);
+            dbQuerySelector.Compile()(Object).Returns(mock.Object);
 
             _dbQueryCache.Add(memberInfo, mock);
             return mock;
@@ -90,11 +90,11 @@ namespace EntityFrameworkCoreMock.NSubstitute
         {
             _dbSetCache.Clear();
             _dbQueryCache.Clear();
-            DbContextObject.ClearReceivedCalls();
-            DbContextObject.SaveChanges().Returns(_ => SaveChanges());
-            DbContextObject.SaveChanges(Arg.Any<bool>()).Returns(_ => SaveChanges());
-            DbContextObject.SaveChangesAsync().Returns(_ => SaveChanges());
-            DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(_ => SaveChanges());
+            Object.ClearReceivedCalls();
+            Object.SaveChanges().Returns(_ => SaveChanges());
+            Object.SaveChanges(Arg.Any<bool>()).Returns(_ => SaveChanges());
+            Object.SaveChangesAsync().Returns(_ => SaveChanges());
+            Object.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(_ => SaveChanges());
         }
 
         // Facilitates unit-testing
