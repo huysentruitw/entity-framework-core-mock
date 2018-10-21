@@ -48,17 +48,22 @@ namespace EntityFrameworkCoreMock
             if (databaseGeneratedAttribute?.DatabaseGeneratedOption != DatabaseGeneratedOption.Identity) return null;
             if (!typeof(long).IsAssignableFrom(keyProperty.PropertyType)) return null;
 
-            return (entity, keyContext) =>
-            {
-                var keyValue = (long)keyProperty.GetValue(entity);
-                if (keyValue == 0)
-                {
-                    keyValue = keyContext.NextIdentity;
-                    keyProperty.SetValue(entity, keyValue);
-                }
+            var entityArgument = Expression.Parameter(typeof(T));
+            var keyContextArgument = Expression.Parameter(typeof(KeyContext));
+            var keyValueVariable = Expression.Variable(typeof(long));
 
-                return keyValue;
-            };
+            var body = Expression.Block(typeof(object),
+                new[] { keyValueVariable },
+                Expression.Assign(keyValueVariable, Expression.Convert(Expression.Property(entityArgument, keyProperty), typeof(long))),
+                Expression.IfThen(Expression.Equal(keyValueVariable, Expression.Constant(0L)),
+                    Expression.Block(
+                        Expression.Assign(keyValueVariable, Expression.Property(keyContextArgument, nameof(KeyContext.NextIdentity))),
+                        Expression.Assign(Expression.Property(entityArgument, keyProperty), keyValueVariable)
+                    )
+                ),
+                Expression.Convert(keyValueVariable, typeof(object)));
+
+            return Expression.Lambda<Func<T, KeyContext, object>>(body, entityArgument, keyContextArgument).Compile();
         }
 
         private static Func<T, KeyContext, object> BuildDefaultKeyFactory<T>(PropertyInfo[] keyProperties)
