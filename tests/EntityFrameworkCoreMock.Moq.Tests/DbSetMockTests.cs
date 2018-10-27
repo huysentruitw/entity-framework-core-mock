@@ -177,6 +177,36 @@ namespace EntityFrameworkCoreMock.Tests
             Assert.That(nestedModels.Count(), Is.EqualTo(2));
         }
 
+        [Test]
+        public async Task DbSetMock_AsyncProvider_ShouldReturnRequestedModel()
+        {
+            var userId = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = userId, FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, (x, _) => x.Id);
+
+            var model = await dbSetMock.Object.Where(x => x.Id == userId).FirstOrDefaultAsync();
+            Assert.That(model, Is.Not.Null);
+            Assert.That(model.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public async Task DbSetMock_AsyncProvider_OrderBy_ShouldReturnRequestedModel()
+        {
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, (x, _) => x.Id);
+
+            var result = await dbSetMock.Object.Where(x => x.Id != Guid.Empty).OrderBy(x => x.FullName).ToListAsync();
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result.First().FullName, Is.EqualTo("Freddy Kipcurry"));
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }
