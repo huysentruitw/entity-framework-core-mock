@@ -56,6 +56,10 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.AddRangeAsync(It.IsAny<TEntity[]>())).Callback<TEntity[]>(x => _store.Add(x)).Returns(Task.CompletedTask);
             Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TEntity>>(), It.IsAny<CancellationToken>())).Callback<IEnumerable<TEntity>, CancellationToken>((x, _) => _store.Add(x)).Returns(Task.CompletedTask);
 
+            Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(_store.Find);
+            Setup(x => x.FindAsync(It.IsAny<object[]>())).Returns<object[]>(x => Task.FromResult(_store.Find(x)));
+            Setup(x => x.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>())).Returns<object[], CancellationToken>((x, _) => Task.FromResult(_store.Find(x)));
+
             _store.UpdateSnapshot();
         }
 

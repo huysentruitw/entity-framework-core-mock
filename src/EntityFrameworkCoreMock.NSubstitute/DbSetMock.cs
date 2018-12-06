@@ -18,6 +18,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 
@@ -54,6 +56,10 @@ namespace EntityFrameworkCoreMock.NSubstitute
             Object.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
             Object.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));
             Object.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(0)));
+
+            Object.Find(Arg.Any<object[]>()).Returns(info => _store.Find(info.Args()[0] as object[]));
+            Object.FindAsync(Arg.Any<object[]>()).Returns(info => Task.FromResult(_store.Find(info.Args()[0] as object[])));
+            Object.FindAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(info => Task.FromResult(_store.Find(info.Args()[0] as object[])));
 
             _store.UpdateSnapshot();
         }

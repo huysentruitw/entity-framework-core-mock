@@ -55,6 +55,25 @@ namespace EntityFrameworkCoreMock
         public void Add(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Add(entities));
 
         /// <summary>
+        /// Find an entity by its key.
+        /// </summary>
+        /// <param name="keyValues">The key.</param>
+        /// <returns>The entity or null in case no entity with a matching key was found.</returns>
+        /// <remarks>This method only works with the built-in key factory. When you pass your own key factory, it might work when the factory outputs the composite key as a Tuple.</remarks>
+        public TEntity Find(object[] keyValues)
+        {
+            var tupleType = Type.GetType($"System.Tuple`{keyValues.Length}");
+            if (tupleType == null) throw new InvalidOperationException($"No tuple type found for {keyValues.Length} generic arguments");
+
+            var keyTypes = keyValues.Select(x => x.GetType()).ToArray();
+            var constructor = tupleType.MakeGenericType(keyTypes).GetConstructor(keyTypes);
+            if (constructor == null) throw new InvalidOperationException("No tuple constructor found for key values");
+
+            var key = constructor.Invoke(keyValues);
+            return _entities[key];
+        }
+
+        /// <summary>
         /// Registers the removal of an entity.
         /// </summary>
         /// <param name="entity">The removed entity.</param>
