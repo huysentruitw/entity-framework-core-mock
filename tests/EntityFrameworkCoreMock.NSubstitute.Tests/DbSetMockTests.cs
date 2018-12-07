@@ -249,6 +249,20 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.That(result.FullName, Is.EqualTo("Freddy Kipcurry"));
         }
 
+        [Test]
+        public void DbSetMock_Find_UnknownId_ShouldReturnNull()
+        {
+            var unknownUser = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, (x, _) => new Tuple<Guid>(x.Id));
+
+            var result = dbSetMock.Object.Find(unknownUser);
+            Assert.That(result, Is.Null);
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }
