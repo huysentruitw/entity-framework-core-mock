@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/huysentruitw/entity-framework-core-mock</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Easy Mock wrapper for mocking EntityFrameworkCore (EFCore) DbContext and DbSet using NSubstitute</Description>
-    <Copyright>Copyright 2017-2018 Wouter Huysentruit, Paul Michaels</Copyright>
+    <Copyright>Copyright 2017-20139 Wouter Huysentruit, Paul Michaels</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
