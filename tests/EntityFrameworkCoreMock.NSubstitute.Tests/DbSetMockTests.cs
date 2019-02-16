@@ -242,7 +242,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             {
                 new User {Id = user1, FullName = "Mark Kramer"},
                 new User {Id = user2, FullName = "Freddy Kipcurry"}
-            }, (x, _) => new Tuple<Guid>(x.Id));
+            }, (x, _) => x.Id);
 
             var result = dbSetMock.Object.Find(user2);
             Assert.That(result, Is.Not.Null);
@@ -257,10 +257,42 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             {
                 new User {Id = Guid.NewGuid(), FullName = "Mark Kramer"},
                 new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
-            }, (x, _) => new Tuple<Guid>(x.Id));
+            }, (x, _) => x.Id);
 
             var result = dbSetMock.Object.Find(unknownUser);
             Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void DbSetMock_FindOnCompositeTupleKey_ShouldReturnRequestedModel()
+        {
+            Guid modelId1 = Guid.NewGuid(), modelId2 = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<NoKeyModel>(new[]
+            {
+                new NoKeyModel {Id = modelId1, Value = "Value 1"},
+                new NoKeyModel {Id = modelId2, Value = "Value 2"}
+            }, (x, _) => new Tuple<Guid, string>(x.Id, x.Value));
+
+            var result = dbSetMock.Object.Find(modelId2, "Value 2");
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(modelId2));
+            Assert.That(result.Value, Is.EqualTo("Value 2"));
+        }
+
+        [Test]
+        public void DbSetMock_FindOnCompositeValueTupleKey_ShouldReturnRequestedModel()
+        {
+            Guid modelId1 = Guid.NewGuid(), modelId2 = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<NoKeyModel>(new[]
+            {
+                new NoKeyModel {Id = modelId1, Value = "Value 1"},
+                new NoKeyModel {Id = modelId2, Value = "Value 2"}
+            }, (x, _) => (x.Id, x.Value));
+
+            var result = dbSetMock.Object.Find(modelId2, "Value 2");
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(modelId2));
+            Assert.That(result.Value, Is.EqualTo("Value 2"));
         }
 
         public class NestedModel
