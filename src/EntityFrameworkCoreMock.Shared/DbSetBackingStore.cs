@@ -59,7 +59,6 @@ namespace EntityFrameworkCoreMock
         /// </summary>
         /// <param name="keyValues">The key.</param>
         /// <returns>The entity or null in case no entity with a matching key was found.</returns>
-        /// <remarks>This method only works with the built-in key factory. When you pass your own key factory, it might work when the factory outputs the composite key as a Tuple.</remarks>
         public TEntity Find(object[] keyValues)
         {
             var tupleType = Type.GetType($"System.Tuple`{keyValues.Length}");
