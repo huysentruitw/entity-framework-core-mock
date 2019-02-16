@@ -54,7 +54,8 @@ namespace EntityFrameworkCoreMock
             {
                 return BuildIdentityKeyFactory<T, long>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
             }
-            else if (keyProperty.PropertyType == typeof(Guid))
+
+            if (keyProperty.PropertyType == typeof(Guid))
             {
                 return BuildIdentityKeyFactory<T, Guid>(keyProperty, _ => Expression.Call(typeof(Guid), nameof(Guid.NewGuid), Array.Empty<Type>()));
             }
