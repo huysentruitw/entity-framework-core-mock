@@ -35,7 +35,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
         public TDbContext Object { get; set; }
 
         public DbContextMock(params object[] args)
-            : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
+            : this(new CompositKeyFactoryBuilder(), args)
         {
         }
 

@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -34,7 +33,7 @@ namespace EntityFrameworkCoreMock
         private readonly Dictionary<MemberInfo, IDbQueryMock> _dbQueryCache = new Dictionary<MemberInfo, IDbQueryMock>();
 
         public DbContextMock(params object[] args)
-            : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
+            : this(new CompositKeyFactoryBuilder(), args)
         {
         }
 

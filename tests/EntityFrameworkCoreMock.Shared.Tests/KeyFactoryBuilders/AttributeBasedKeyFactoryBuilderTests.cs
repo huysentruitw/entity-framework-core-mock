@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using EntityFrameworkCoreMock.Shared.Tests.Models;
 using NUnit.Framework;
 
-namespace EntityFrameworkCoreMock.Shared.Tests
+namespace EntityFrameworkCoreMock.Shared.Tests.KeyFactoryBuilders
 {
     [TestFixture]
     public class AttributeBasedKeyFactoryBuilderTests

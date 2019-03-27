@@ -20,24 +20,19 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EntityFrameworkCoreMock
+namespace EntityFrameworkCoreMock.Shared.KeyFactoryBuilders
 {
-    public sealed class AttributeBasedKeyFactoryBuilder<TAttribute> : IKeyFactoryBuilder
-        where TAttribute : Attribute
+    public abstract class KeyFactoryBuilderBase : IKeyFactoryBuilder
     {
         public Func<T, KeyContext, object> BuildKeyFactory<T>()
         {
-            var entityType = typeof(T);
-            var keyProperties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute(typeof(TAttribute)) != null)
-                .ToArray();
-
-            if (!keyProperties.Any()) throw new InvalidOperationException($"Entity type {entityType.Name} does not contain any property marked with {typeof(TAttribute).Name}");
-
+            var keyProperties = ResolveKeyProperties<T>();
             var keyFactory = BuildIdentityKeyFactory<T>(keyProperties);
             keyFactory = keyFactory ?? BuildDefaultKeyFactory<T>(keyProperties);
             return keyFactory;
         }
+
+        protected abstract PropertyInfo[] ResolveKeyProperties<T>();
 
         private static Func<T, KeyContext, object> BuildIdentityKeyFactory<T>(PropertyInfo[] keyProperties)
         {

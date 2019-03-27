@@ -123,20 +123,23 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         }
 
         [Test]
-        public void DbContextMock_CreateDbSetMock_NoKeyFactoryForModelWithoutKeyAttributes_ShouldThrowException()
+        public void DbContextMock_CreateDbSetMock_NoKeyFactoryForModelWithoutId_ShouldThrowException()
         {
+            // Arrange
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            var ex = Assert.Throws<InvalidOperationException>(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels));
-            Assert.That(ex.Message, Is.EqualTo("Entity type NoKeyModel does not contain any property marked with KeyAttribute"));
+
+            // Act & Assert
+            var ex = Assert.Throws<AggregateException>(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels));
+            Assert.That(ex.Message, Does.StartWith("No key factory could be created for entity type NoKeyModel, see inner exceptions"));
         }
 
         [Test]
-        public void DbContextMock_CreateDbSetMock_CustomKeyFactoryForModelWithoutKeyAttributes_ShouldNotThrowException()
+        public void DbContextMock_CreateDbSetMock_PassCustomKeyFactoryForModelWithoutId_ShouldNotThrowException()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() =>
                 dbContextMock.CreateDbSetMock(
-                    x => x.NoKeyModels, (x, _) => x.Id));
+                    x => x.NoKeyModels, (x, _) => x.ModelId));
         }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]

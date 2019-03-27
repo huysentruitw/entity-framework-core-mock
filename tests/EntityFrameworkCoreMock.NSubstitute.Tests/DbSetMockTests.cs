@@ -269,13 +269,13 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Guid modelId1 = Guid.NewGuid(), modelId2 = Guid.NewGuid();
             var dbSetMock = new DbSetMock<NoKeyModel>(new[]
             {
-                new NoKeyModel {Id = modelId1, Value = "Value 1"},
-                new NoKeyModel {Id = modelId2, Value = "Value 2"}
-            }, (x, _) => new Tuple<Guid, string>(x.Id, x.Value));
+                new NoKeyModel {ModelId = modelId1, Value = "Value 1"},
+                new NoKeyModel {ModelId = modelId2, Value = "Value 2"}
+            }, (x, _) => new Tuple<Guid, string>(x.ModelId, x.Value));
 
             var result = dbSetMock.Object.Find(modelId2, "Value 2");
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Id, Is.EqualTo(modelId2));
+            Assert.That(result.ModelId, Is.EqualTo(modelId2));
             Assert.That(result.Value, Is.EqualTo("Value 2"));
         }
 
@@ -285,13 +285,13 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Guid modelId1 = Guid.NewGuid(), modelId2 = Guid.NewGuid();
             var dbSetMock = new DbSetMock<NoKeyModel>(new[]
             {
-                new NoKeyModel {Id = modelId1, Value = "Value 1"},
-                new NoKeyModel {Id = modelId2, Value = "Value 2"}
-            }, (x, _) => (x.Id, x.Value));
+                new NoKeyModel {ModelId = modelId1, Value = "Value 1"},
+                new NoKeyModel {ModelId = modelId2, Value = "Value 2"}
+            }, (x, _) => (x.ModelId, x.Value));
 
             var result = dbSetMock.Object.Find(modelId2, "Value 2");
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Id, Is.EqualTo(modelId2));
+            Assert.That(result.ModelId, Is.EqualTo(modelId2));
             Assert.That(result.Value, Is.EqualTo("Value 2"));
         }
 
