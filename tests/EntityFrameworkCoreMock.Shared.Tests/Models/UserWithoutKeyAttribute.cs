@@ -4,10 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EntityFrameworkCoreMock.Shared.Tests.Models
 {
-    public class User
+    public class UserWithoutKeyAttribute
     {
-        [Key, Column(Order = 0)]
-        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
 
         public string FullName { get; set; }
     }
