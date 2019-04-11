@@ -23,9 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCoreMock.Sha
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NSubstitute", "NSubstitute", "{6320D96B-E5E7-4183-964E-3A9CC7BAD043}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCoreMock.NSubstitute.Tests", "tests\EntityFrameworkCoreMock.NSubstitute.Tests\EntityFrameworkCoreMock.NSubstitute.Tests.csproj", "{8E8FB4F1-578A-4DC2-B113-97B87C0E3501}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCoreMock.NSubstitute.Tests", "tests\EntityFrameworkCoreMock.NSubstitute.Tests\EntityFrameworkCoreMock.NSubstitute.Tests.csproj", "{8E8FB4F1-578A-4DC2-B113-97B87C0E3501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCoreMock.NSubstitute", "src\EntityFrameworkCoreMock.NSubstitute\EntityFrameworkCoreMock.NSubstitute.csproj", "{2C669CD3-5428-48EE-A809-53E5B7E4E5A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCoreMock.NSubstitute", "src\EntityFrameworkCoreMock.NSubstitute\EntityFrameworkCoreMock.NSubstitute.csproj", "{2C669CD3-5428-48EE-A809-53E5B7E4E5A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

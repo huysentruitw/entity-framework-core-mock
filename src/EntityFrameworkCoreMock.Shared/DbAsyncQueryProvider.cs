@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -16,7 +17,21 @@ namespace EntityFrameworkCoreMock
             _inner = inner;
         }
 
-        public IQueryable CreateQuery(Expression expression) => new DbAsyncEnumerable<TEntity>(expression);
+        public IQueryable CreateQuery(Expression expression)
+        {
+            var entityType = expression.Type.IsGenericType && expression.Type.GenericTypeArguments.Length == 1
+                ? expression.Type.GenericTypeArguments[0]
+                : typeof(TEntity);
+
+            if (entityType != typeof(TEntity))
+            {
+                var genericDbAsyncEnumerableType = typeof(DbAsyncEnumerable<>);
+                var dbAsyncEnumerableType = genericDbAsyncEnumerableType.MakeGenericType(entityType);
+                return (IQueryable)Activator.CreateInstance(dbAsyncEnumerableType, expression);
+            }
+
+            return new DbAsyncEnumerable<TEntity>(expression);
+        }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new DbAsyncEnumerable<TElement>(expression);
 
