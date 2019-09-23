@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NSubstitute;
 
 namespace EntityFrameworkCoreMock.NSubstitute
@@ -53,6 +54,21 @@ namespace EntityFrameworkCoreMock.NSubstitute
             }
 
             Object.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(0)));
+            Object.AddAsync(Arg.Any<TEntity>(), Arg.Any<CancellationToken>()).Returns(info =>
+            {
+                _store.Add(info.ArgAt<TEntity>(0));
+                return default(EntityEntry<TEntity>);
+            });
+            Object.AddRangeAsync(Arg.Any<TEntity[]>()).Returns(info =>
+            {
+                _store.Add(info.ArgAt<TEntity[]>(0));
+                return Task.CompletedTask;
+            });
+            Object.AddRangeAsync(Arg.Any<IEnumerable<TEntity>>(), Arg.Any<CancellationToken>()).Returns(info =>
+            {
+                _store.Add(info.ArgAt<IEnumerable<TEntity>>(0));
+                return Task.CompletedTask;
+            });
             Object.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
             Object.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));
             Object.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(0)));

@@ -167,6 +167,25 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+        public async Task DbContextMock_CreateDbSetMock_AsyncAddMultipleModelsWithLongAsDatabaseGeneratedIdentityKey_ShouldGenerateIncrementalKey()
+        {
+            // Arrange
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Issue20Models);
+
+            // Act
+            await dbContextMock.Object.Issue20Models.AddAsync(new Issue20Model { Url = "A" });
+            await dbContextMock.Object.Issue20Models.AddAsync(new Issue20Model { Url = "B" });
+            await dbContextMock.Object.Issue20Models.AddAsync(new Issue20Model { Url = "C" });
+            await dbContextMock.Object.SaveChangesAsync();
+
+            // Assert
+            Assert.That(dbSetMock.Object.First(x => x.Url == "A").LoggingRepositoryId, Is.EqualTo(1));
+            Assert.That(dbSetMock.Object.First(x => x.Url == "B").LoggingRepositoryId, Is.EqualTo(2));
+            Assert.That(dbSetMock.Object.First(x => x.Url == "C").LoggingRepositoryId, Is.EqualTo(3));
+        }
+
+        [Test]
         public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
@@ -246,6 +265,8 @@ namespace EntityFrameworkCoreMock.Tests
             public virtual DbSet<GeneratedGuidKeyModel> GeneratedGuidKeyModels { get; set; }
 
             public virtual DbQuery<QueryModel> QueryModels { get; set; }
+
+            public virtual DbSet<Issue20Model> Issue20Models { get; set; }
         }
     }
 }
