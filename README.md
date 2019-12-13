@@ -69,3 +69,13 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
     }
 
     public DbContextOptions<TestDbContext> DummyOptions { get; } = new DbContextOptionsBuilder<TestDbContext>().Options;
+    
+    //mocking a DbQuery
+    var dbQueryItems = new []
+            {
+                new User { Id = Guid.NewGuid(), FullName = "Eric Cartoon" },
+                new User { Id = Guid.NewGuid(), FullName = "Billy Jewel" },
+            };
+
+    var usersDbQueryMock = dbContextMock.CreateDbQueryMock(x => x.Users, dbQueryItems);
+    
