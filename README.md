@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/l7h9tp2ylcuw5c1r/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/entity-framework-core-mock/branch/master)
 
-Easy Mock wrapper for mocking EntityFrameworkCore (EFCore) DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
+Easy Mock wrapper for mocking EntityFrameworkCore 2 (EFCore2) DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
 
 ## Get it on NuGet
 
@@ -93,7 +93,7 @@ For the Moq version, you can use all known [Moq](https://github.com/Moq/moq4/wik
             var ordersDbQueryMock = dbContextMock.CreateDbQueryMock(x => x.Orders, initialEntities);
 
             // Pass dbContextMock.Object to the class/method you want to test
-		}
+	}
     }
 
     public DbContextOptions<TestDbContext> DummyOptions { get; } = new DbContextOptionsBuilder<TestDbContext>().Options;
