@@ -21,6 +21,14 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+        public void DbSetMock_AsQueryable_ShouldReturnQueryable()
+        {
+            var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+            Assert.That(dbSet.AsQueryable(), Is.Not.Null);
+        }
+
+        [Test]
         public void DbSetMock_Include_ShouldForwardProvider()
         {
             var dbSetMock = new DbSetMock<Order>(null, (x, _) => x.Id);

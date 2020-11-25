@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿/*
+ * Copyright 2017-2020 Wouter Huysentruit
+ *
+ * See LICENSE file.
+ */
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityFrameworkCoreMock
@@ -13,9 +18,14 @@ namespace EntityFrameworkCoreMock
             _inner = inner;
         }
 
-        public void Dispose() => _inner.Dispose();
+        public ValueTask<bool> MoveNextAsync()
+            => new ValueTask<bool>(_inner.MoveNext());
 
-        public Task<bool> MoveNext(CancellationToken cancellationToken) => Task.FromResult(_inner.MoveNext());
+        public ValueTask DisposeAsync()
+        {
+            _inner.Dispose();
+            return default;
+        }
 
         public TEntity Current => _inner.Current;
     }

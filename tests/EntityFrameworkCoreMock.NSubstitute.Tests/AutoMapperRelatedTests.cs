@@ -22,8 +22,10 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         [Test]
         public async Task DbSetMock_AutoMapperProjectTo()
         {
-            Mapper.Initialize(cfg => {
-                cfg.CreateMap<User, UserModel>()
+            var mapperConfiguration = new MapperConfiguration(config =>
+            {
+                config
+                    .CreateMap<User, UserModel>()
                     .ForMember(d => d.Name, opt => opt.MapFrom(s => s.FullName));
             });
 
@@ -38,7 +40,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
 
             var models = await dbSet
                 .Where(u => u.FullName != null)
-                .ProjectTo<UserModel>()
+                .ProjectTo<UserModel>(mapperConfiguration)
                 .ToListAsync();
 
             Assert.That(models.Count, Is.EqualTo(2));

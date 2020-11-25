@@ -1,10 +1,16 @@
-﻿using System;
+﻿/*
+ * Copyright 2017-2020 Wouter Huysentruit
+ *
+ * See LICENSE file.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace EntityFrameworkCoreMock
 {
@@ -19,28 +25,54 @@ namespace EntityFrameworkCoreMock
 
         public IQueryable CreateQuery(Expression expression)
         {
-            var entityType = expression.Type.IsGenericType && expression.Type.GenericTypeArguments.Length == 1
-                ? expression.Type.GenericTypeArguments[0]
-                : typeof(TEntity);
-
-            if (entityType != typeof(TEntity))
+            if (expression is MethodCallExpression m)
             {
-                var genericDbAsyncEnumerableType = typeof(DbAsyncEnumerable<>);
-                var dbAsyncEnumerableType = genericDbAsyncEnumerableType.MakeGenericType(entityType);
-                return (IQueryable)Activator.CreateInstance(dbAsyncEnumerableType, expression);
+                var resultType = m.Method.ReturnType; // it should be IQueryable<T>
+                var tElement = resultType.GetGenericArguments().First();
+                var queryType = typeof(DbAsyncEnumerable<>).MakeGenericType(tElement);
+                return (IQueryable)Activator.CreateInstance(queryType, expression);
             }
 
             return new DbAsyncEnumerable<TEntity>(expression);
         }
 
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new DbAsyncEnumerable<TElement>(expression);
+        public IQueryable<T> CreateQuery<T>(Expression expression)
+        {
+            return new DbAsyncEnumerable<T>(expression);
+        }
 
-        public object Execute(Expression expression) => _inner.Execute(expression);
+        public object Execute(Expression expression)
+        {
+            return CompileExpressionItem<object>(expression);
+        }
 
-        public TResult Execute<TResult>(Expression expression) => _inner.Execute<TResult>(expression);
+        public TResult Execute<TResult>(Expression expression)
+        {
+            return CompileExpressionItem<TResult>(expression);
+        }
 
-        public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression) => new DbAsyncEnumerable<TResult>(expression);
+        public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
+        {
+            var expectedResultType = typeof(TResult).GetGenericArguments()[0];
+            var executionResult = typeof(IQueryProvider)
+                .GetMethod(
+                    name: nameof(IQueryProvider.Execute),
+                    genericParameterCount: 1,
+                    types: new[] { typeof(Expression) })
+                .MakeGenericMethod(expectedResultType)
+                .Invoke(this, new[] { expression });
 
-        public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken) => Task.FromResult(Execute<TResult>(expression));
+            return (TResult)typeof(Task).GetMethod(nameof(Task.FromResult))
+                .MakeGenericMethod(expectedResultType)
+                .Invoke(null, new[] { executionResult });
+        }
+
+        private static T CompileExpressionItem<T>(Expression expression)
+            => Expression.Lambda<Func<T>>(
+                body: new Visitor().Visit(expression) ?? throw new InvalidOperationException("Visitor returns null"),
+                parameters: (IEnumerable<ParameterExpression>) null)
+            .Compile()();
+
+        private class Visitor : ExpressionVisitor { }
     }
 }

@@ -1,8 +1,15 @@
-﻿using System;
+﻿/*
+ * Copyright 2017-2020 Wouter Huysentruit
+ *
+ * See LICENSE file.
+ */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace EntityFrameworkCoreMock
 {
@@ -25,7 +32,7 @@ namespace EntityFrameworkCoreMock
         IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
             => _enumerable.GetEnumerator();
 
-        IAsyncEnumerator<TEntity> IAsyncEnumerable<TEntity>.GetEnumerator()
+        IAsyncEnumerator<TEntity> IAsyncEnumerable<TEntity>.GetAsyncEnumerator(CancellationToken cancellationToken)
             => new DbAsyncEnumerator<TEntity>(this.AsEnumerable().GetEnumerator());
 
         IEnumerator IEnumerable.GetEnumerator()

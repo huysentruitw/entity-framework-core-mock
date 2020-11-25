@@ -63,7 +63,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             dbSet.AddRange(users);
             ((IDbSetMock)dbSetMock).SaveChanges();
 
-            // Assert            
+            // Assert
             var firstUser = users.First();
             Assert.That(dbSet.Count(), Is.EqualTo(3));
             Assert.That(dbSet.Any(x => x.Id == firstUser.Id

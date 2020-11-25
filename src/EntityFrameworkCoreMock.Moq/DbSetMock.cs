@@ -1,17 +1,7 @@
 ﻿/*
- * Copyright 2017-2019 Wouter Huysentruit
+ * Copyright 2017-2020 Wouter Huysentruit
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * See LICENSE file.
  */
 
 using System;
@@ -44,7 +34,7 @@ namespace EntityFrameworkCoreMock
 
             if (asyncQuerySupport)
             {
-                As<IAsyncEnumerable<TEntity>>().Setup(x => x.GetEnumerator()).Returns(() => new DbAsyncEnumerator<TEntity>(data.GetEnumerator()));
+                As<IAsyncEnumerable<TEntity>>().Setup(x => x.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(() => new DbAsyncEnumerator<TEntity>(data.GetEnumerator()));
             }
 
             Setup(x => x.Add(It.IsAny<TEntity>())).Callback<TEntity>(_store.Add);
@@ -57,8 +47,8 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TEntity>>(), It.IsAny<CancellationToken>())).Callback<IEnumerable<TEntity>, CancellationToken>((x, _) => _store.Add(x)).Returns(Task.CompletedTask);
 
             Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(_store.Find);
-            Setup(x => x.FindAsync(It.IsAny<object[]>())).Returns<object[]>(x => Task.FromResult(_store.Find(x)));
-            Setup(x => x.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>())).Returns<object[], CancellationToken>((x, _) => Task.FromResult(_store.Find(x)));
+            Setup(x => x.FindAsync(It.IsAny<object[]>())).Returns<object[]>(x => new ValueTask<TEntity>(_store.Find(x)));
+            Setup(x => x.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>())).Returns<object[], CancellationToken>((x, _) => new ValueTask<TEntity>(_store.Find(x)));
 
             _store.UpdateSnapshot();
         }
