@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/huysentruitw/entity-framework-core-mock</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Easy Mock wrapper for mocking EntityFrameworkCore 5 (EFCore5) DbContext and DbSet using NSubstitute</Description>
-    <Copyright>Copyright 2017-20139 Wouter Huysentruit, Paul Michaels</Copyright>
+    <Copyright>Copyright 2017-2020 Wouter Huysentruit, Paul Michaels</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
