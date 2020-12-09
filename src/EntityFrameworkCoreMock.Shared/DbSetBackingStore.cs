@@ -166,7 +166,7 @@ namespace EntityFrameworkCoreMock
         private static TEntity Clone(TEntity original) => CloneFuncCache.GetOrAdd(original.GetType(), CreateCloneFunc)(original);
         private static readonly ConcurrentDictionary<Type, Func<TEntity, TEntity>> CloneFuncCache = new ConcurrentDictionary<Type, Func<TEntity, TEntity>>();
         private static Func<TEntity, TEntity> CreateCloneFunc(Type entityType)
-        { 
+        {
             var properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
                 .Where(x => x.GetSetMethod() != null)
