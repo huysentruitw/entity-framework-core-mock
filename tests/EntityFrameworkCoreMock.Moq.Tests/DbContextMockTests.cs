@@ -119,7 +119,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => 
-                x.ProtectedPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
+                x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
         }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]
@@ -244,7 +244,7 @@ namespace EntityFrameworkCoreMock.Tests
 
             public virtual DbSet<NoKeyModel> NoKeyModels { get; set; }
             
-            public virtual DbSet<ProtectedSetterPropertyModel> ProtectedPropertyModels { get; set; }
+            public virtual DbSet<ProtectedSetterPropertyModel> ProtectedSetterPropertyModels { get; set; }
 
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
 
