@@ -113,6 +113,14 @@ namespace EntityFrameworkCoreMock.Tests
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels, (x, _) => x, new NoKeyModel[] { new NoKeyModel() }));
         }
+        
+        [Test]
+        public void DbContextMock_CreateDbSetMock_ModelWithProtectedProperties_ShouldNotThrowException()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => 
+                x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
+        }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]
         public void DbContextMock_CreateDbSetMock_AddModelWithSameKeyTwice_ShouldThrowDbUpdatedException()
@@ -235,6 +243,8 @@ namespace EntityFrameworkCoreMock.Tests
             public virtual DbSet<User> Users { get; set; }
 
             public virtual DbSet<NoKeyModel> NoKeyModels { get; set; }
+            
+            public virtual DbSet<ProtectedSetterPropertyModel> ProtectedSetterPropertyModels { get; set; }
 
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
 

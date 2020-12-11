@@ -149,6 +149,7 @@ namespace EntityFrameworkCoreMock
         {
             var properties = snapshot.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
+                .Where(x => x.GetSetMethod() != null)
                 .ToArray();
 
             return properties
@@ -168,6 +169,7 @@ namespace EntityFrameworkCoreMock
         {
             var properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
+                .Where(x => x.GetSetMethod() != null)
                 .ToArray();
 
             var original = Expression.Parameter(typeof(TEntity), "original");
