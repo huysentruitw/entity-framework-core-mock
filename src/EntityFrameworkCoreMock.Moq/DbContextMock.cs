@@ -10,7 +10,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 
 namespace EntityFrameworkCoreMock
@@ -61,6 +64,13 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.SaveChanges()).Returns(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
+
+            var mockDbFacade = new Mock<DatabaseFacade>(Object);
+            var mockTransaction = new Mock<IDbContextTransaction>();
+            mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
+            mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(mockTransaction.Object));
+            Setup(x => x.Database).Returns(mockDbFacade.Object);
         }
 
         // Facilitates unit-testing
