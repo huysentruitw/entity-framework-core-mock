@@ -218,6 +218,25 @@ namespace EntityFrameworkCoreMock.Tests
             var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet.AsQueryable(), Is.Not.Null);
         }
+        
+        [Test]
+        public void DbContextMock_BeginTransaction_CommitTransaction_ShouldNotFail()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            Assert.DoesNotThrow(() =>
+            {
+                var transaction = dbContextMock.Object.Database.BeginTransaction();
+                transaction.Commit();
+                transaction.Rollback();
+            });
+            
+            Assert.DoesNotThrowAsync(async () =>
+            {
+                var transaction = await dbContextMock.Object.Database.BeginTransactionAsync();
+                await transaction.CommitAsync();
+                await transaction.RollbackAsync();
+            });
+        }
 
         public class TestDbSetMock : IDbSetMock
         {

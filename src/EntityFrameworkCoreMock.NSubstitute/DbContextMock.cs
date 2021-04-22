@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using NSubstitute;
 
 namespace EntityFrameworkCoreMock.NSubstitute
@@ -31,6 +32,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
         {
             Object = Substitute.For<TDbContext>(args);
+            Object.Database.Returns(Substitute.For<DatabaseFacade>(Object));
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
             Reset();
         }
