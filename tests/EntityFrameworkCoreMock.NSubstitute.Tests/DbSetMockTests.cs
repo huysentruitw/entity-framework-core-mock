@@ -48,11 +48,11 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbSetMock_GivenEntityRangeIsAdded_ShouldAddAfterCallingSaveChanges()
         {
             // Arrange
-            var users = new List<User>()
+            var users = new[]
             {
-                new User() { Id = Guid.NewGuid(), FullName = "Ian Kilmister" },
-                new User() { Id = Guid.NewGuid(), FullName = "Phil Taylor" },
-                new User() { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
+                new User { Id = Guid.NewGuid(), FullName = "Ian Kilmister" },
+                new User { Id = Guid.NewGuid(), FullName = "Phil Taylor" },
+                new User { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
             };
             var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
@@ -68,6 +68,47 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.That(dbSet.Count(), Is.EqualTo(3));
             Assert.That(dbSet.Any(x => x.Id == firstUser.Id
                 && x.FullName == firstUser.FullName), Is.True);
+        }
+
+        [Test]
+        public void DbSetMock_GivenEntityIsUpdated_ShouldUpdateAfterCallingSaveChanges()
+        {
+            var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
+            var dbSetMock = new DbSetMock<User>(new[] { user }, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+
+            dbSet.Update(new User { Id = user.Id, FullName = "Fake Snake" });
+            Assert.That(dbSet.First().FullName, Is.EqualTo("Fake Drake"));
+            ((IDbSetMock)dbSetMock).SaveChanges();
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            Assert.That(dbSet.First().FullName, Is.EqualTo("Fake Snake"));
+        }
+
+        [Test]
+        public void DbSetMock_GivenEntityRangeIsUpdated_ShouldUpdateAfterCallingSaveChanges()
+        {
+            // Arrange
+            var users = new[]
+            {
+                new User { Id = Guid.NewGuid(), FullName = "Ian Kilmister" },
+                new User { Id = Guid.NewGuid(), FullName = "Phil Taylor" },
+                new User { Id = Guid.NewGuid(), FullName = "Eddie Clarke" }
+            };
+            var dbSetMock = new DbSetMock<User>(users, (x, _) => x.Id);
+            var dbSet = dbSetMock.Object;
+
+            // Act
+            dbSet.UpdateRange(new []
+            {
+                new User { Id = users[0].Id, FullName = "Ian Kilmister AAA" },
+                new User { Id = users[1].Id, FullName = "Phil Taylor AAA" },
+                new User { Id = users[2].Id, FullName = "Eddie Clarke AAA" }
+            });
+            ((IDbSetMock)dbSetMock).SaveChanges();
+
+            // Assert
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            Assert.That(dbSet.All(x => x.FullName.EndsWith("AAA")), Is.True);
         }
 
         [Test]

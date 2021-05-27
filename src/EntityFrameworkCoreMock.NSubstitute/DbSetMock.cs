@@ -43,6 +43,15 @@ namespace EntityFrameworkCoreMock.NSubstitute
             }
 
             Object.When(a => a.Add(Arg.Any<TEntity>())).Do(b => _store.Add(b.ArgAt<TEntity>(0)));
+            Object.When(a => a.AddRange(Arg.Any<TEntity[]>())).Do(b => _store.Add(b.ArgAt<TEntity[]>(0)));
+            Object.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
+            Object.When(a => a.Update(Arg.Any<TEntity>())).Do(b => _store.Update(b.ArgAt<TEntity>(0)));
+            Object.When(a => a.UpdateRange(Arg.Any<TEntity[]>())).Do(b => _store.Update(b.ArgAt<TEntity[]>(0)));
+            Object.When(a => a.UpdateRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Update(b.ArgAt<IEnumerable<TEntity>>(0)));
+            Object.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));
+            Object.When(a => a.RemoveRange(Arg.Any<TEntity[]>())).Do(b => _store.Remove(b.ArgAt<TEntity[]>(0)));
+            Object.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(0)));
+
             Object.AddAsync(Arg.Any<TEntity>(), Arg.Any<CancellationToken>()).Returns(info =>
             {
                 _store.Add(info.ArgAt<TEntity>(0));
@@ -58,9 +67,6 @@ namespace EntityFrameworkCoreMock.NSubstitute
                 _store.Add(info.ArgAt<IEnumerable<TEntity>>(0));
                 return Task.CompletedTask;
             });
-            Object.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Add(b.ArgAt<IEnumerable<TEntity>>(0)));
-            Object.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => _store.Remove(b.ArgAt<TEntity>(0)));
-            Object.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => _store.Remove(b.ArgAt<IEnumerable<TEntity>>(0)));
 
             Object.Find(Arg.Any<object[]>()).Returns(info => _store.Find(info.Args()[0] as object[]));
             Object.FindAsync(Arg.Any<object[]>()).Returns(info => new ValueTask<TEntity>(_store.Find(info.Args()[0] as object[])));
