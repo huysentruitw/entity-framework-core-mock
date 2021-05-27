@@ -63,6 +63,18 @@ namespace EntityFrameworkCoreMock
         }
 
         /// <summary>
+        /// Registers the update of an entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        public void Update(TEntity entity) => _changes.Add(DbSetChange.Update(entity));
+
+        /// <summary>
+        /// Registers the update of one or more entities.
+        /// </summary>
+        /// <param name="entities"></param>
+        public void Update(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Update(entities));
+
+        /// <summary>
         /// Registers the removal of an entity.
         /// </summary>
         /// <param name="entity">The removed entity.</param>
@@ -84,6 +96,7 @@ namespace EntityFrameworkCoreMock
             foreach (var change in changes)
             {
                 if (change.IsAdd) AddEntity(change.Entity);
+                else if (change.IsUpdate) UpdateEntity(change.Entity);
                 else if (change.IsRemove) RemoveEntity(change.Entity);
             }
 
@@ -127,6 +140,13 @@ namespace EntityFrameworkCoreMock
             var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
             if (_entities.ContainsKey(key)) ThrowDbUpdateException();
             _entities.Add(key, entity);
+        }
+
+        private void UpdateEntity(TEntity entity)
+        {
+            var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
+            if (!_entities.ContainsKey(key)) ThrowDbUpdateException();
+            _entities[key] = entity;
         }
 
         private void RemoveEntity(TEntity entity)
@@ -195,6 +215,8 @@ namespace EntityFrameworkCoreMock
         {
             public bool IsAdd { get; private set; }
 
+            public bool IsUpdate { get; private set; }
+
             public bool IsRemove { get; private set; }
 
             public TEntity Entity { get; private set; }
@@ -202,6 +224,10 @@ namespace EntityFrameworkCoreMock
             public static DbSetChange Add(TEntity entity) => new DbSetChange { IsAdd = true, Entity = entity };
 
             public static IEnumerable<DbSetChange> Add(IEnumerable<TEntity> entities) => entities.Select(DbSetChange.Add);
+
+            public static DbSetChange Update(TEntity entity) => new DbSetChange { IsUpdate = true, Entity = entity };
+
+            public static IEnumerable<DbSetChange> Update(IEnumerable<TEntity> entities) => entities.Select(DbSetChange.Update);
 
             public static DbSetChange Remove(TEntity entity) => new DbSetChange { IsRemove = true, Entity = entity };
 

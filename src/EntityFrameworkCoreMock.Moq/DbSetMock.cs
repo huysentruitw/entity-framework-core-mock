@@ -38,12 +38,17 @@ namespace EntityFrameworkCoreMock
             }
 
             Setup(x => x.Add(It.IsAny<TEntity>())).Callback<TEntity>(_store.Add);
+            Setup(x => x.AddRange(It.IsAny<TEntity[]>())).Callback<TEntity[]>(_store.Add);
             Setup(x => x.AddRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Add);
+            Setup(x => x.Update(It.IsAny<TEntity>())).Callback<TEntity>(_store.Update);
+            Setup(x => x.UpdateRange(It.IsAny<TEntity[]>())).Callback<TEntity[]>(_store.Update);
+            Setup(x => x.UpdateRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Update);
             Setup(x => x.Remove(It.IsAny<TEntity>())).Callback<TEntity>(_store.Remove);
+            Setup(x => x.RemoveRange(It.IsAny<TEntity[]>())).Callback<TEntity[]>(_store.Remove);
             Setup(x => x.RemoveRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Remove);
 
             Setup(x => x.AddAsync(It.IsAny<TEntity>(), It.IsAny<CancellationToken>())).Callback<TEntity, CancellationToken>((x, _) => _store.Add(x)).ReturnsAsync(default(EntityEntry<TEntity>));
-            Setup(x => x.AddRangeAsync(It.IsAny<TEntity[]>())).Callback<TEntity[]>(x => _store.Add(x)).Returns(Task.CompletedTask);
+            Setup(x => x.AddRangeAsync(It.IsAny<TEntity[]>())).Callback<TEntity[]>(_store.Add).Returns(Task.CompletedTask);
             Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<TEntity>>(), It.IsAny<CancellationToken>())).Callback<IEnumerable<TEntity>, CancellationToken>((x, _) => _store.Add(x)).Returns(Task.CompletedTask);
 
             Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(_store.Find);
