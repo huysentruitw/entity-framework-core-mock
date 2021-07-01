@@ -50,6 +50,7 @@ namespace EntityFrameworkCoreMock
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
+            mock.Setup(x => x.AsQueryable()).Returns(() => mock.Object);
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
             _dbSetCache.Add(memberInfo, mock);
