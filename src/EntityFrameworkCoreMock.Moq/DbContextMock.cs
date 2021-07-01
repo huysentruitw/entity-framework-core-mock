@@ -69,7 +69,7 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
 
-            MockEntryCall<It.IsAnyType>(); //my best shot but sadly doesn't work like that
+            // MockEntryCall<It.IsAnyType>(); //my best shot but sadly doesn't work like that
             
             var mockDbFacade = new Mock<DatabaseFacade>(Object);
             var mockTransaction = new Mock<IDbContextTransaction>();
@@ -79,27 +79,27 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.Database).Returns(mockDbFacade.Object);
         }
 
-        public virtual void MockEntryCall<TEntity>() where TEntity : class
-        {
-            Setup(x => x.Entry(It.IsAny<TEntity>())).Returns<EntityEntry<TEntity>>(EntryMock);
-        }
-
-        public virtual EntityEntry<TEntity> EntryMock<TEntity>(TEntity entity)
-            where TEntity : class
-        {
-            var entry = EntryWithoutDetectChangesMock(entity);
-            // TryDetectChanges(entry);
-            return entry;
-        }
-        
-        private EntityEntry<TEntity> EntryWithoutDetectChangesMock<TEntity>(TEntity entity)
-            where TEntity : class
-        {
-            var mock = new Mock<EntityEntry<TEntity>>(entity);
-            mock.Setup(x => x.Reload()).Verifiable();
-            mock.Setup(x => x.ReloadAsync(It.IsAny<CancellationToken>())).Verifiable();
-            return mock.Object;
-        }
+        // public virtual void MockEntryCall<TEntity>() where TEntity : class
+        // {
+        //     Setup(x => x.Entry(It.IsAny<TEntity>())).Returns<EntityEntry<TEntity>>(EntryMock);
+        // }
+        //
+        // public virtual EntityEntry<TEntity> EntryMock<TEntity>(TEntity entity)
+        //     where TEntity : class
+        // {
+        //     var entry = EntryWithoutDetectChangesMock(entity);
+        //     // TryDetectChanges(entry);
+        //     return entry;
+        // }
+        //
+        // private EntityEntry<TEntity> EntryWithoutDetectChangesMock<TEntity>(TEntity entity)
+        //     where TEntity : class
+        // {
+        //     var mock = new Mock<EntityEntry<TEntity>>(entity);
+        //     mock.Setup(x => x.Reload()).Verifiable();
+        //     mock.Setup(x => x.ReloadAsync(It.IsAny<CancellationToken>())).Verifiable();
+        //     return mock.Object;
+        // }
 
         // Facilitates unit-testing
         internal void RegisterDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IDbSetMock dbSet)
