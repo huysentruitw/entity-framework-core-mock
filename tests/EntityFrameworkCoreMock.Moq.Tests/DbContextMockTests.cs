@@ -57,7 +57,7 @@ namespace EntityFrameworkCoreMock.Tests
             dbContextMock.CreateDbSetMock(x => x.Users);
             var ex = Assert.Throws<ArgumentException>(() => dbContextMock.CreateDbSetMock(x => x.Users));
             Assert.That(ex.ParamName, Is.EqualTo("dbSetSelector"));
-            Assert.That(ex.Message, Does.StartWith("DbSetMock for Users already created"));
+            Assert.That(ex.Message, Does.StartWith("DbSetMock for entity User already created"));
         }
 
         [Test]
@@ -113,12 +113,12 @@ namespace EntityFrameworkCoreMock.Tests
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => x.NoKeyModels, (x, _) => x, new NoKeyModel[] { new NoKeyModel() }));
         }
-        
+
         [Test]
         public void DbContextMock_CreateDbSetMock_ModelWithProtectedProperties_ShouldNotThrowException()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x => 
+            Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x =>
                 x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
         }
 
@@ -201,6 +201,14 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+        public void DbContextMock_CreateDbSetMock_GenericDbSetSelector_ShouldReturnDbSetMock()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Set<User>());
+            Assert.That(dbSetMock.Object, Is.Not.Null);
+        }
+
+        [Test]
         public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
@@ -218,7 +226,7 @@ namespace EntityFrameworkCoreMock.Tests
             var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet.AsQueryable(), Is.Not.Null);
         }
-        
+
         [Test]
         public void DbContextMock_BeginTransaction_CommitTransaction_ShouldNotFail()
         {
@@ -229,7 +237,7 @@ namespace EntityFrameworkCoreMock.Tests
                 transaction.Commit();
                 transaction.Rollback();
             });
-            
+
             Assert.DoesNotThrowAsync(async () =>
             {
                 var transaction = await dbContextMock.Object.Database.BeginTransactionAsync();
@@ -262,7 +270,7 @@ namespace EntityFrameworkCoreMock.Tests
             public virtual DbSet<User> Users { get; set; }
 
             public virtual DbSet<NoKeyModel> NoKeyModels { get; set; }
-            
+
             public virtual DbSet<ProtectedSetterPropertyModel> ProtectedSetterPropertyModels { get; set; }
 
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }

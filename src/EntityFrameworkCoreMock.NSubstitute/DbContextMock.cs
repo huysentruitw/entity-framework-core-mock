@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -19,8 +18,7 @@ namespace EntityFrameworkCoreMock.NSubstitute
     public class DbContextMock<TDbContext> where TDbContext : DbContext
     {
         private readonly IKeyFactoryBuilder _keyFactoryBuilder;
-        private readonly Dictionary<MemberInfo, IDbSetMock> _dbSetCache = new Dictionary<MemberInfo, IDbSetMock>();
-        private readonly Dictionary<MemberInfo, IDbQueryMock> _dbQueryCache = new Dictionary<MemberInfo, IDbQueryMock>();
+        private readonly Dictionary<Type, IDbSetMock> _dbSetCache = new Dictionary<Type, IDbSetMock>();
 
         public TDbContext Object { get; set; }
 
@@ -50,21 +48,20 @@ namespace EntityFrameworkCoreMock.NSubstitute
             if (dbSetSelector == null) throw new ArgumentNullException(nameof(dbSetSelector));
             if (entityKeyFactory == null) throw new ArgumentNullException(nameof(entityKeyFactory));
 
-            var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
-            if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
+            var entityType = typeof(TEntity);
+            if (_dbSetCache.ContainsKey(entityType)) throw new ArgumentException($"DbSetMock for entity {entityType.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Object.Set<TEntity>().Returns(mock.Object);
 
             dbSetSelector.Compile()(Object).Returns(mock.Object);
 
-            _dbSetCache.Add(memberInfo, mock);
+            _dbSetCache.Add(entityType, mock);
             return mock;
         }
 
         public void Reset()
         {
             _dbSetCache.Clear();
-            _dbQueryCache.Clear();
             Object.ClearReceivedCalls();
             Object.SaveChanges().Returns(_ => SaveChanges());
             Object.SaveChanges(Arg.Any<bool>()).Returns(_ => SaveChanges());
@@ -76,8 +73,8 @@ namespace EntityFrameworkCoreMock.NSubstitute
         internal void RegisterDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IDbSetMock dbSet)
             where TEntity : class
         {
-            var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
-            _dbSetCache.Add(memberInfo, dbSet);
+            var entityType = typeof(TEntity);
+            _dbSetCache.Add(entityType, dbSet);
         }
 
         private int SaveChanges() => _dbSetCache.Values.Aggregate(0, (seed, dbSet) => seed + dbSet.SaveChanges());

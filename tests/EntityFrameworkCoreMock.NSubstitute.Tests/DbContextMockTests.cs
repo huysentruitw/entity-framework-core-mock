@@ -86,7 +86,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             // Assert
             var ex = Assert.Throws<ArgumentException>(CreateDbMock);
             Assert.That(ex.ParamName, Is.EqualTo("dbSetSelector"));
-            Assert.That(ex.Message, Does.StartWith("DbSetMock for Users already created"));
+            Assert.That(ex.Message, Does.StartWith("DbSetMock for entity User already created"));
         }
 
         [Test]
@@ -264,6 +264,14 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         }
 
         [Test]
+        public void DbContextMock_CreateDbSetMock_GenericDbSetSelector_ShouldReturnDbSetMock()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Set<User>());
+            Assert.That(dbSetMock.Object, Is.Not.Null);
+        }
+
+        [Test]
         public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
@@ -272,7 +280,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             Assert.That(dbSet, Is.Not.Null);
             Assert.That(dbSet, Is.EqualTo(dbSetMock.Object));
         }
-        
+
         [Test]
         public void DbContextMock_BeginTransaction_CommitTransaction_ShouldNotFail()
         {
@@ -283,7 +291,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
                 transaction.Commit();
                 transaction.Rollback();
             });
-            
+
             Assert.DoesNotThrowAsync(async () =>
             {
                 var transaction = await dbContextMock.Object.Database.BeginTransactionAsync();
