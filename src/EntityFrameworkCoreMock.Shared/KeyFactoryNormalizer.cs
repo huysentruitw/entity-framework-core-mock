@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2017-2020 Wouter Huysentruit
+ * Copyright 2017-2021 Wouter Huysentruit
  *
  * See LICENSE file.
  */
