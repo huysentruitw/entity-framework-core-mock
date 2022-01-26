@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -78,9 +77,8 @@ namespace EntityFrameworkCoreMock
             var mockDbFacade = new Mock<DatabaseFacade>(context.Object);
             var mockTransaction = new Mock<IDbContextTransaction>();
             mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
-
             mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(mockTransaction.Object));
+                .ReturnsAsync(mockTransaction.Object);
             context.Setup(x => x.Database).Returns(mockDbFacade.Object);
         }
 
