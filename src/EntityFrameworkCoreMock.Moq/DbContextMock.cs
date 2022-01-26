@@ -24,15 +24,20 @@ namespace EntityFrameworkCoreMock
         private readonly Dictionary<Type, IDbSetMock> _dbSetCache = new Dictionary<Type, IDbSetMock>();
 
         public DbContextMock(params object[] args)
-            : this(new CompositeKeyFactoryBuilder(), args)
+            : this(ConfigureTransaction, args)
         {
         }
 
-        private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
+        public DbContextMock(Action<DbContextMock<TDbContext>> configure, params object[] args)
+            : this(new CompositeKeyFactoryBuilder(), configure, args)
+        {
+        }
+
+        private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, Action<DbContextMock<TDbContext>> configure, params object[] args)
             : base(args)
         {
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
-            Reset();
+            Reset(configure);
         }
 
         public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null)
@@ -54,7 +59,10 @@ namespace EntityFrameworkCoreMock
             return mock;
         }
 
-        public void Reset()
+        public void Reset() =>
+            Reset(ConfigureTransaction);
+
+        public void Reset(Action<DbContextMock<TDbContext>> configure)
         {
             MockExtensions.Reset(this);
             _dbSetCache.Clear();
@@ -62,12 +70,18 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
 
-            var mockDbFacade = new Mock<DatabaseFacade>(Object);
+            configure(this);
+        }
+
+        public static void ConfigureTransaction(DbContextMock<TDbContext> context)
+        {
+            var mockDbFacade = new Mock<DatabaseFacade>(context.Object);
             var mockTransaction = new Mock<IDbContextTransaction>();
             mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
+
             mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(mockTransaction.Object));
-            Setup(x => x.Database).Returns(mockDbFacade.Object);
+            context.Setup(x => x.Database).Returns(mockDbFacade.Object);
         }
 
         // Facilitates unit-testing
