@@ -4,6 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityFrameworkCoreMock.Tests.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
+using Moq;
 using NUnit.Framework;
 
 namespace EntityFrameworkCoreMock.Tests
@@ -119,7 +122,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x =>
-                x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
+                x.ProtectedSetterPropertyModels, (x, _) => x, new[] { new ProtectedSetterPropertyModel() }));
         }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]
@@ -128,10 +131,10 @@ namespace EntityFrameworkCoreMock.Tests
             var userId = Guid.NewGuid();
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
-            dbSetMock.Object.Add(new User {Id = Guid.NewGuid(), FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
+            dbSetMock.Object.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
             dbContextMock.Object.SaveChanges();
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
             Assert.Throws<DbUpdateException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -140,7 +143,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Remove(new User {Id = Guid.NewGuid()});
+            dbSetMock.Object.Remove(new User { Id = Guid.NewGuid() });
             Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -153,7 +156,7 @@ namespace EntityFrameworkCoreMock.Tests
                 new GeneratedKeyModel {Value = "first"},
                 new GeneratedKeyModel {Value = "second"}
             });
-            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "third" });
+            dbSetMock.Object.Add(new GeneratedKeyModel { Value = "third" });
             dbContextMock.Object.SaveChanges();
 
             Assert.That(dbSetMock.Object.Min(x => x.Id), Is.EqualTo(1));
@@ -245,6 +248,38 @@ namespace EntityFrameworkCoreMock.Tests
                 await transaction.RollbackAsync();
             });
         }
+
+#pragma warning disable EF1001 // Internal EF Core API usage.
+        [Test]
+        public void DbContextMock_Constructor_DoNotPassCustomConfiguration_WithInterfaceSetup_IgnoresTheSetup()
+        {
+            var stateManager = Mock.Of<IStateManager>();
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+
+            ConfigureAsDbContextDependencies(dbContextMock, stateManager);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _ = ((IDbContextDependencies)dbContextMock.Object).StateManager;
+            });
+        }
+
+        [Test]
+        public void DbContextMock_Constructor_WhenPassingCustomConfiguration_WithInterfaceSetup_UsesTheSetup()
+        {
+            var stateManager = Mock.Of<IStateManager>();
+            var dbContextMock = new DbContextMock<TestDbContext>(x => ConfigureAsDbContextDependencies(x, stateManager), Options);
+
+            Assert.That(((IDbContextDependencies)dbContextMock.Object).StateManager, Is.EqualTo(stateManager));
+        }
+
+        private static void ConfigureAsDbContextDependencies(DbContextMock<TestDbContext> contextMock, IStateManager stateManager)
+        {
+            contextMock.As<IDbContextDependencies>()
+            .Setup(x => x.StateManager)
+            .Returns(stateManager);
+        }
+#pragma warning restore EF1001 // Internal EF Core API usage.
 
         public class TestDbSetMock : IDbSetMock
         {
