@@ -268,7 +268,11 @@ namespace EntityFrameworkCoreMock.Tests
         public void DbContextMock_Constructor_WhenPassingCustomConfiguration_WithInterfaceSetup_UsesTheSetup()
         {
             var stateManager = Mock.Of<IStateManager>();
-            var dbContextMock = new DbContextMock<TestDbContext>(x => ConfigureAsDbContextDependencies(x, stateManager), Options);
+            var dbContextMock = new DbContextMock<TestDbContext>(x =>
+            {
+                ConfigureAsDbContextDependencies(x, stateManager);
+                DbContextMock<TestDbContext>.ConfigureTransaction(x);
+            }, Options);
 
             Assert.That(((IDbContextDependencies)dbContextMock.Object).StateManager, Is.EqualTo(stateManager));
         }
