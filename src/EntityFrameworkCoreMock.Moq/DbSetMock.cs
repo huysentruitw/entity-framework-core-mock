@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,14 @@ namespace EntityFrameworkCoreMock
         private readonly DbSetBackingStore<TEntity> _store;
 
         public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory, bool asyncQuerySupport = true)
+            : this(new DbSetBackingStore<TEntity>(initialEntities, keyFactory), asyncQuerySupport) { }
+
+        public DbSetMock(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory, Expression<Func<TEntity, bool>> globalQueryFilter, bool asyncQuerySupport = true)
+            : this(new DbSetWithGlobalFilterBackingStore<TEntity>(initialEntities, keyFactory, globalQueryFilter), asyncQuerySupport) { }
+
+        public DbSetMock(DbSetBackingStore<TEntity> store, bool asyncQuerySupport = true)
         {
-            _store = new DbSetBackingStore<TEntity>(initialEntities, keyFactory);
+            _store = store;
 
             var data = _store.GetDataAsQueryable();
             As<IQueryable<TEntity>>().Setup(x => x.Provider).Returns(asyncQuerySupport ? new DbAsyncQueryProvider<TEntity>(data.Provider) : data.Provider);

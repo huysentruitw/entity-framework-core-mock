@@ -15,11 +15,12 @@ using System.Threading;
 
 namespace EntityFrameworkCoreMock
 {
-    public sealed class DbSetBackingStore<TEntity>
+    public class DbSetBackingStore<TEntity>
         where TEntity : class
     {
+        protected readonly Dictionary<object, TEntity> Entities = new Dictionary<object, TEntity>();
+
         private readonly KeyFactoryNormalizer<TEntity> _keyFactoryNormalizer;
-        private readonly Dictionary<object, TEntity> _entities = new Dictionary<object, TEntity>();
         private readonly Dictionary<object, TEntity> _snapshot = new Dictionary<object, TEntity>();
         private List<DbSetChange> _changes = new List<DbSetChange>();
         private readonly KeyContext _keyContext = new KeyContext();
@@ -27,29 +28,29 @@ namespace EntityFrameworkCoreMock
         public DbSetBackingStore(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory)
         {
             _keyFactoryNormalizer = new KeyFactoryNormalizer<TEntity>(keyFactory ?? throw new ArgumentNullException(nameof(keyFactory)));
-            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactoryNormalizer.GenerateKey(x, _keyContext), Clone(x)));
+            initialEntities?.ToList().ForEach(x => Entities.Add(_keyFactoryNormalizer.GenerateKey(x, _keyContext), Clone(x)));
         }
 
-        public IQueryable<TEntity> GetDataAsQueryable() => _entities.Values.AsQueryable();
+        public virtual IQueryable<TEntity> GetDataAsQueryable() => Entities.Values.AsQueryable();
 
         /// <summary>
         /// Registers the addition of a new entity.
         /// </summary>
         /// <param name="entity">The new entity.</param>
-        public void Add(TEntity entity) => _changes.Add(DbSetChange.Add(entity));
+        public virtual void Add(TEntity entity) => _changes.Add(DbSetChange.Add(entity));
 
         /// <summary>
         /// Registers the addition of one or more entities.
         /// </summary>
         /// <param name="entities">The list of entities.</param>
-        public void Add(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Add(entities));
+        public virtual void Add(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Add(entities));
 
         /// <summary>
         /// Find an entity by its key.
         /// </summary>
         /// <param name="keyValues">The key.</param>
         /// <returns>The entity or null in case no entity with a matching key was found.</returns>
-        public TEntity Find(object[] keyValues)
+        public virtual TEntity Find(object[] keyValues)
         {
             var tupleType = Type.GetType($"System.Tuple`{keyValues.Length}");
             if (tupleType == null) throw new InvalidOperationException($"No tuple type found for {keyValues.Length} generic arguments");
@@ -59,38 +60,38 @@ namespace EntityFrameworkCoreMock
             if (constructor == null) throw new InvalidOperationException("No tuple constructor found for key values");
 
             var key = constructor.Invoke(keyValues);
-            return _entities.TryGetValue(key, out var entity) ? entity : null;
+            return Entities.TryGetValue(key, out var entity) ? entity : null;
         }
 
         /// <summary>
         /// Registers the update of an entity.
         /// </summary>
         /// <param name="entity"></param>
-        public void Update(TEntity entity) => _changes.Add(DbSetChange.Update(entity));
+        public virtual void Update(TEntity entity) => _changes.Add(DbSetChange.Update(entity));
 
         /// <summary>
         /// Registers the update of one or more entities.
         /// </summary>
         /// <param name="entities"></param>
-        public void Update(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Update(entities));
+        public virtual void Update(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Update(entities));
 
         /// <summary>
         /// Registers the removal of an entity.
         /// </summary>
         /// <param name="entity">The removed entity.</param>
-        public void Remove(TEntity entity) => _changes.Add(DbSetChange.Remove(entity));
+        public virtual void Remove(TEntity entity) => _changes.Add(DbSetChange.Remove(entity));
 
         /// <summary>
         /// Registers the removal of one or more entities.
         /// </summary>
         /// <param name="entities">The list of removed entities.</param>
-        public void Remove(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Remove(entities));
+        public virtual void Remove(IEnumerable<TEntity> entities) => _changes.AddRange(DbSetChange.Remove(entities));
 
         /// <summary>
         /// Applies the registered changes to the collection of entities.
         /// </summary>
         /// <returns>The number of changes that got applied.</returns>
-        public int ApplyChanges()
+        public virtual int ApplyChanges()
         {
             var changes = Interlocked.Exchange(ref _changes, new List<DbSetChange>());
             foreach (var change in changes)
@@ -106,10 +107,10 @@ namespace EntityFrameworkCoreMock
         /// <summary>
         /// Updates the snapshot of the entities that is used to detect updated properties.
         /// </summary>
-        public void UpdateSnapshot()
+        public virtual void UpdateSnapshot()
         {
             _snapshot.Clear();
-            foreach (var kvp in _entities)
+            foreach (var kvp in Entities)
                 _snapshot.Add(kvp.Key, Clone(kvp.Value));
         }
 
@@ -117,9 +118,9 @@ namespace EntityFrameworkCoreMock
         /// Gets a list of entities that have one or more properties updated (as compared to the last snapshot).
         /// </summary>
         /// <returns>The list of updated entities.</returns>
-        public UpdatedEntityInfo<TEntity>[] GetUpdatedEntities()
+        public virtual UpdatedEntityInfo<TEntity>[] GetUpdatedEntities()
         {
-            return _entities
+            return Entities
                 .Join(
                     _snapshot,
                     entity => entity.Key,
@@ -138,21 +139,21 @@ namespace EntityFrameworkCoreMock
         private void AddEntity(TEntity entity)
         {
             var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
-            if (_entities.ContainsKey(key)) ThrowDbUpdateException();
-            _entities.Add(key, entity);
+            if (Entities.ContainsKey(key)) ThrowDbUpdateException();
+            Entities.Add(key, entity);
         }
 
         private void UpdateEntity(TEntity entity)
         {
             var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
-            if (!_entities.ContainsKey(key)) ThrowDbUpdateException();
-            _entities[key] = entity;
+            if (!Entities.ContainsKey(key)) ThrowDbUpdateException();
+            Entities[key] = entity;
         }
 
         private void RemoveEntity(TEntity entity)
         {
             var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
-            if (!_entities.Remove(key)) ThrowDbUpdateConcurrencyException();
+            if (!Entities.Remove(key)) ThrowDbUpdateConcurrencyException();
         }
 
         private static void ThrowDbUpdateException()
@@ -202,7 +203,7 @@ namespace EntityFrameworkCoreMock
                     properties.Select(propertyInfo =>
                     {
                         var getter = Expression.Property(Expression.Convert(original, entityType), propertyInfo);
-                        var setter = propertyInfo.GetSetMethod();
+                        var setter = propertyInfo.GetSetMethod(true);
                         return Expression.Call(clone, setter, getter);
                     })
                 ),

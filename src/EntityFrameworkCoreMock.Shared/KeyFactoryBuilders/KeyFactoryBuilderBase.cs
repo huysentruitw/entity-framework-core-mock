@@ -32,18 +32,15 @@ namespace EntityFrameworkCoreMock.Shared.KeyFactoryBuilders
             var databaseGeneratedAttribute = keyProperty.GetCustomAttribute(typeof(DatabaseGeneratedAttribute)) as DatabaseGeneratedAttribute;
             if (databaseGeneratedAttribute?.DatabaseGeneratedOption != DatabaseGeneratedOption.Identity) return null;
 
-            var entityArgument = Expression.Parameter(typeof(T));
-            var keyContextArgument = Expression.Parameter(typeof(KeyContext));
-
             if (keyProperty.PropertyType == typeof(int))
             {
                 return BuildIdentityKeyFactory<T, int>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
             }
-            else if (keyProperty.PropertyType == typeof(long))
+            if (keyProperty.PropertyType == typeof(long))
             {
                 return BuildIdentityKeyFactory<T, long>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
             }
-            else if (keyProperty.PropertyType == typeof(Guid))
+            if (keyProperty.PropertyType == typeof(Guid))
             {
                 return BuildIdentityKeyFactory<T, Guid>(keyProperty, _ => Expression.Call(typeof(Guid), nameof(Guid.NewGuid), Array.Empty<Type>()));
             }

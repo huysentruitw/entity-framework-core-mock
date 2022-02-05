@@ -35,21 +35,38 @@ namespace EntityFrameworkCoreMock
             Reset();
         }
 
-        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null)
-            where TEntity : class
-            => CreateDbSetMock(dbSetSelector, _keyFactoryBuilder.BuildKeyFactory<TEntity>(), initialEntities);
+        public Func<TEntity, KeyContext, object> GetDefaultEntityKeyFactory<TEntity>() =>
+            _keyFactoryBuilder.BuildKeyFactory<TEntity>();
 
-        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, Func<TEntity, KeyContext, object> entityKeyFactory, IEnumerable<TEntity> initialEntities = null)
+        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, IEnumerable<TEntity> initialEntities = null, Expression<Func<TEntity, bool>> globalQueryFilter = null)
+            where TEntity : class
+            => CreateDbSetMock(dbSetSelector, GetDefaultEntityKeyFactory<TEntity>(), initialEntities, globalQueryFilter);
+
+        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, Func<TEntity, KeyContext, object> entityKeyFactory, IEnumerable<TEntity> initialEntities = null, Expression<Func<TEntity, bool>> globalQueryFilter = null)
+            where TEntity : class
+        {
+            if (entityKeyFactory == null) throw new ArgumentNullException(nameof(entityKeyFactory));
+
+            var store = globalQueryFilter == null
+                ? new DbSetBackingStore<TEntity>(initialEntities, entityKeyFactory)
+                : new DbSetWithGlobalFilterBackingStore<TEntity>(initialEntities, entityKeyFactory, globalQueryFilter);
+            return CreateDbSetMock(dbSetSelector, store);
+        }
+
+        public DbSetMock<TEntity> CreateDbSetMock<TEntity>(Expression<Func<TDbContext, DbSet<TEntity>>> dbSetSelector, DbSetBackingStore<TEntity> store)
             where TEntity : class
         {
             if (dbSetSelector == null) throw new ArgumentNullException(nameof(dbSetSelector));
-            if (entityKeyFactory == null) throw new ArgumentNullException(nameof(entityKeyFactory));
 
             var entityType = typeof(TEntity);
             if (_dbSetCache.ContainsKey(entityType)) throw new ArgumentException($"DbSetMock for entity {entityType.Name} already created", nameof(dbSetSelector));
-            var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
+            var mock = new DbSetMock<TEntity>(store);
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
+            Setup(x => x.Add(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => Object.Set<TEntity>().Add(entity));
+            Setup(x => x.Remove(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => Object.Set<TEntity>().Remove(entity));
             _dbSetCache.Add(entityType, mock);
             return mock;
         }
