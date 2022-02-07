@@ -50,6 +50,10 @@ namespace EntityFrameworkCoreMock
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
+            Setup(x => x.Add(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => Object.Set<TEntity>().Add(entity));
+            Setup(x => x.Remove(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => Object.Set<TEntity>().Remove(entity));
             _dbSetCache.Add(entityType, mock);
             return mock;
         }
