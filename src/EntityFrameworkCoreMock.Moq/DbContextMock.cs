@@ -72,7 +72,7 @@ namespace EntityFrameworkCoreMock
                 var mockTransaction = new Mock<IDbContextTransaction>();
                 mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
                 mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(mockTransaction.Object));
+                    .ReturnsAsync(mockTransaction.Object);
                 return mockDbFacade;
             });
 
