@@ -189,7 +189,7 @@ namespace EntityFrameworkCoreMock
         {
             var properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
-                .Where(x => x.GetSetMethod(true) != null)
+                .Where(x => x.GetSetMethod(nonPublic: true) != null)
                 .ToArray();
 
             var original = Expression.Parameter(typeof(TEntity), "original");
