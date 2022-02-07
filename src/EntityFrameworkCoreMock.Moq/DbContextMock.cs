@@ -66,12 +66,17 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
 
-            var mockDbFacade = new Mock<DatabaseFacade>(Object);
-            var mockTransaction = new Mock<IDbContextTransaction>();
-            mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
-            mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(mockTransaction.Object));
-            Setup(x => x.Database).Returns(mockDbFacade.Object);
+            var lazyMockDbFacade = new Lazy<Mock<DatabaseFacade>>(() =>
+            {
+                var mockDbFacade = new Mock<DatabaseFacade>(Object);
+                var mockTransaction = new Mock<IDbContextTransaction>();
+                mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
+                mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(mockTransaction.Object));
+                return mockDbFacade;
+            });
+
+            Setup(x => x.Database).Returns(() => lazyMockDbFacade.Value.Object);
         }
 
         // Facilitates unit-testing
