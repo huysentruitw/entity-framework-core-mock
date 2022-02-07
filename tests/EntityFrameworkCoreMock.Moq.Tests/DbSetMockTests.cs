@@ -39,7 +39,7 @@ namespace EntityFrameworkCoreMock.Tests
         [Test]
         public void DbSetMock_GivenEntityIsAdded_ShouldAddAfterCallingSaveChanges()
         {
-            var user = new User {Id = Guid.NewGuid(), FullName = "Fake Drake"};
+            var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
             var dbSetMock = new DbSetMock<User>(null, (x, _) => x.Id);
             var dbSet = dbSetMock.Object;
 
@@ -105,7 +105,7 @@ namespace EntityFrameworkCoreMock.Tests
             var dbSet = dbSetMock.Object;
 
             // Act
-            dbSet.UpdateRange(new []
+            dbSet.UpdateRange(new[]
             {
                 new User { Id = users[0].Id, FullName = "Ian Kilmister AAA" },
                 new User { Id = users[1].Id, FullName = "Phil Taylor AAA" },
@@ -136,7 +136,7 @@ namespace EntityFrameworkCoreMock.Tests
         [Test]
         public void DbSetMock_GivenEntityIsRemoved_ShouldRemoveAfterCallingSaveChanges()
         {
-            var user = new User {Id = Guid.NewGuid(), FullName = "Fake Drake"};
+            var user = new User { Id = Guid.NewGuid(), FullName = "Fake Drake" };
             var dbSetMock = new DbSetMock<User>(new[]
             {
                 user,
@@ -145,7 +145,7 @@ namespace EntityFrameworkCoreMock.Tests
             var dbSet = dbSetMock.Object;
 
             Assert.That(dbSet.Count(), Is.EqualTo(2));
-            dbSet.Remove(new User {Id = user.Id});
+            dbSet.Remove(new User { Id = user.Id });
             Assert.That(dbSet.Count(), Is.EqualTo(2));
             Assert.That(dbSet.Any(x => x.Id == user.Id && x.FullName == user.FullName), Is.True);
             ((IDbSetMock)dbSetMock).SaveChanges();
@@ -382,6 +382,18 @@ namespace EntityFrameworkCoreMock.Tests
         public class ConcreteModel : AbstractModel
         {
             public string Name { get; set; } = "SomeName";
+        }
+
+        [Test]
+        public void DbSetMock_ModelPropertyWithPrivateSetter_ShouldSetTheProperty()
+        {
+            var dbSetMock = new DbSetMock<PrivateSetterPropertyModel>(new[]
+            {
+                new PrivateSetterPropertyModel("my value")
+            }, (x, _) => x.Private);
+
+            var dbSet = dbSetMock.Object;
+            Assert.That(dbSet.First().Private, Is.EqualTo("my value"));
         }
     }
 }

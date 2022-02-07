@@ -52,6 +52,8 @@ namespace EntityFrameworkCoreMock.NSubstitute
             if (_dbSetCache.ContainsKey(entityType)) throw new ArgumentException($"DbSetMock for entity {entityType.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Object.Set<TEntity>().Returns(mock.Object);
+            Object.Add<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.Add(callInfo.Arg<TEntity>()));
+            Object.Remove<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.Remove(callInfo.Arg<TEntity>()));
 
             dbSetSelector.Compile()(Object).Returns(mock.Object);
 
