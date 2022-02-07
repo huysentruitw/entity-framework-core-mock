@@ -202,7 +202,7 @@ namespace EntityFrameworkCoreMock
                     properties.Select(propertyInfo =>
                     {
                         var getter = Expression.Property(Expression.Convert(original, entityType), propertyInfo);
-                        var setter = propertyInfo.GetSetMethod(true);
+                        var setter = propertyInfo.GetSetMethod(nonPublic: true);
                         return Expression.Call(clone, setter, getter);
                     })
                 ),
