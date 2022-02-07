@@ -189,7 +189,7 @@ namespace EntityFrameworkCoreMock
         {
             var properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && x.CanWrite && x.GetCustomAttribute<NotMappedAttribute>() == null)
-                .Where(x => x.GetSetMethod() != null)
+                .Where(x => x.GetSetMethod(true) != null)
                 .ToArray();
 
             var original = Expression.Parameter(typeof(TEntity), "original");
@@ -202,7 +202,7 @@ namespace EntityFrameworkCoreMock
                     properties.Select(propertyInfo =>
                     {
                         var getter = Expression.Property(Expression.Convert(original, entityType), propertyInfo);
-                        var setter = propertyInfo.GetSetMethod();
+                        var setter = propertyInfo.GetSetMethod(true);
                         return Expression.Call(clone, setter, getter);
                     })
                 ),
