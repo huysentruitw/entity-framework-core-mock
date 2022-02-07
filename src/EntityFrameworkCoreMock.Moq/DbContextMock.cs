@@ -76,12 +76,6 @@ namespace EntityFrameworkCoreMock
             });
 
             Setup(x => x.Database).Returns(() => lazyMockDbFacade.Value.Object);
-            Setup(x => x.AddRange(It.IsAny<object[]>())).Callback<object[]>(entities =>
-            {
-
-
-                //Object.AddRange((IEnumerable<object>)entities);
-            });
         }
 
         // Facilitates unit-testing
