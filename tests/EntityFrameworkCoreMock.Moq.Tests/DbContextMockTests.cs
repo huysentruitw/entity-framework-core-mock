@@ -4,6 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityFrameworkCoreMock.Tests.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
+using Moq;
 using NUnit.Framework;
 
 namespace EntityFrameworkCoreMock.Tests
@@ -222,7 +225,7 @@ namespace EntityFrameworkCoreMock.Tests
         public void DbContextMock_GenericSet_AsQueryable_ShouldReturnQueryable()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
+            dbContextMock.CreateDbSetMock(x => x.Users);
             var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet.AsQueryable(), Is.Not.Null);
         }
@@ -277,13 +280,44 @@ namespace EntityFrameworkCoreMock.Tests
             Assert.That(dbSet.Count(), Is.EqualTo(0));
         }
 
+        [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
+        public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldNotThrow()
+        {
+            // Arrange
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() =>
+            {
+                dbContextMock.As<IDbContextDependencies>()
+                    .Setup(x => x.StateManager)
+                    .Returns(Mock.Of<IStateManager>());
+            });
+        }
+#pragma warning restore EF1001
+
+        [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
+        public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldUseAdditionalMockSetup()
+        {
+            // Arrange
+            var stateManager = Mock.Of<IStateManager>();
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+
+            // Act
+            dbContextMock.As<IDbContextDependencies>()
+                .Setup(x => x.StateManager)
+                .Returns(stateManager);
+
+            // Assert
+            Assert.That(((IDbContextDependencies)dbContextMock.Object).StateManager, Is.EqualTo(stateManager));
+        }
+#pragma warning restore EF1001
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
-        }
-
-        public class TestDbQueryMock : IDbQueryMock
-        {
         }
 
         public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
