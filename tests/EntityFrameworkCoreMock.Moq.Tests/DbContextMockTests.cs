@@ -119,7 +119,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x =>
-                x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
+                x.ProtectedSetterPropertyModels, (x, _) => x, new[] { new ProtectedSetterPropertyModel() }));
         }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]
@@ -128,10 +128,10 @@ namespace EntityFrameworkCoreMock.Tests
             var userId = Guid.NewGuid();
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
-            dbSetMock.Object.Add(new User {Id = Guid.NewGuid(), FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
+            dbSetMock.Object.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
             dbContextMock.Object.SaveChanges();
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
             Assert.Throws<DbUpdateException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -140,7 +140,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Remove(new User {Id = Guid.NewGuid()});
+            dbSetMock.Object.Remove(new User { Id = Guid.NewGuid() });
             Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -153,7 +153,7 @@ namespace EntityFrameworkCoreMock.Tests
                 new GeneratedKeyModel {Value = "first"},
                 new GeneratedKeyModel {Value = "second"}
             });
-            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "third" });
+            dbSetMock.Object.Add(new GeneratedKeyModel { Value = "third" });
             dbContextMock.Object.SaveChanges();
 
             Assert.That(dbSetMock.Object.Min(x => x.Id), Is.EqualTo(1));
@@ -244,6 +244,37 @@ namespace EntityFrameworkCoreMock.Tests
                 await transaction.CommitAsync();
                 await transaction.RollbackAsync();
             });
+        }
+
+        [Test]
+        public void DbContextMock_Add_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            dbContextMock.Object.Add(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_Remove_ShouldRemoveEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Remove(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
         }
 
         public class TestDbSetMock : IDbSetMock
