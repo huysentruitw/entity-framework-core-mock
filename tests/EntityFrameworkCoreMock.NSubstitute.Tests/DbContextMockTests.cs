@@ -300,6 +300,111 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             });
         }
 
+        [Test]
+        public void DbContextMock_Add_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            dbContextMock.Object.Add(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public async Task DbContextMock_AddAsync_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            await dbContextMock.Object.AddAsync(user);
+            await dbContextMock.Object.SaveChangesAsync();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_AddRange_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user1 = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            var user2 = new User { Id = Guid.NewGuid(), FullName = "Some other user" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            dbContextMock.Object.AddRange(new[] { user1, user2 }.AsEnumerable());
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(2));
+            var firstUser = dbSet.First();
+            Assert.That(firstUser, Is.Not.Null);
+            Assert.That(firstUser.FullName, Is.EqualTo("Mark Kramer"));
+            var secondUser = dbSet.Last();
+            Assert.That(secondUser, Is.Not.Null);
+            Assert.That(secondUser.FullName, Is.EqualTo("Some other user"));
+        }
+
+        [Test]
+        public async Task DbContextMock_AddRangeAsync_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user1 = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            var user2 = new User { Id = Guid.NewGuid(), FullName = "Some other user" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            await dbContextMock.Object.AddRangeAsync(new[] { user1, user2 }.AsEnumerable());
+            await dbContextMock.Object.SaveChangesAsync();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(2));
+            var firstUser = dbSet.First();
+            Assert.That(firstUser, Is.Not.Null);
+            Assert.That(firstUser.FullName, Is.EqualTo("Mark Kramer"));
+            var secondUser = dbSet.Last();
+            Assert.That(secondUser, Is.Not.Null);
+            Assert.That(secondUser.FullName, Is.EqualTo("Some other user"));
+        }
+
+        [Test]
+        public void DbContextMock_Remove_ShouldRemoveEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Remove(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void DbContextMock_RemoveRange_ShouldRemoveEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user1 = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            var user2 = new User { Id = Guid.NewGuid(), FullName = "Some other user" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user1, user2 });
+
+            dbContextMock.Object.RemoveRange(new[] { user1, user2 }.AsEnumerable());
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;

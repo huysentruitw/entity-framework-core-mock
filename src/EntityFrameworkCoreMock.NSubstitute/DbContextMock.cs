@@ -53,6 +53,15 @@ namespace EntityFrameworkCoreMock.NSubstitute
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Object.Set<TEntity>().Returns(mock.Object);
 
+            Object.When(a => a.Add(Arg.Any<TEntity>())).Do(b => mock.Object.Add(b.ArgAt<TEntity>(0)));
+            Object.When(a => a.AddAsync(Arg.Any<TEntity>())).Do(b => mock.Object.AddAsync(b.ArgAt<TEntity>(0)));
+
+            Object.When(a => a.AddRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => mock.Object.AddRange(b.ArgAt<IEnumerable<TEntity>>(0)));
+            Object.When(a => a.AddRangeAsync(Arg.Any<IEnumerable<TEntity>>())).Do(b => mock.Object.AddRangeAsync(b.ArgAt<IEnumerable<TEntity>>(0)));
+
+            Object.When(a => a.Remove(Arg.Any<TEntity>())).Do(b => mock.Object.Remove(b.ArgAt<TEntity>(0)));
+            Object.When(a => a.RemoveRange(Arg.Any<IEnumerable<TEntity>>())).Do(b => mock.Object.RemoveRange(b.ArgAt<IEnumerable<TEntity>>(0)));
+
             dbSetSelector.Compile()(Object).Returns(mock.Object);
 
             _dbSetCache.Add(entityType, mock);
