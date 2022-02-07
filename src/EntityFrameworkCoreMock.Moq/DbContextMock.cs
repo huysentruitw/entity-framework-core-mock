@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -50,10 +49,10 @@ namespace EntityFrameworkCoreMock
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
-            Setup(x => x.Add(It.IsAny<TEntity>()))
-                .Callback<TEntity>(entity => mock.Object.Add(entity));
-            Setup(x => x.Remove(It.IsAny<TEntity>()))
-                .Callback<TEntity>(entity => mock.Object.Remove(entity));
+            Setup(x => x.Add(It.IsAny<TEntity>())).Callback<TEntity>(entity => mock.Object.Add(entity));
+            Setup(x => x.AddAsync(It.IsAny<TEntity>(), It.IsAny<CancellationToken>())).Callback<TEntity, CancellationToken>((entity, token) => mock.Object.AddAsync(entity, token));
+            Setup(x => x.Update(It.IsAny<TEntity>())).Callback<TEntity>(entity => mock.Object.Update(entity));
+            Setup(x => x.Remove(It.IsAny<TEntity>())).Callback<TEntity>(entity => mock.Object.Remove(entity));
             _dbSetCache.Add(entityType, mock);
             return mock;
         }
@@ -77,6 +76,12 @@ namespace EntityFrameworkCoreMock
             });
 
             Setup(x => x.Database).Returns(() => lazyMockDbFacade.Value.Object);
+            Setup(x => x.AddRange(It.IsAny<object[]>())).Callback<object[]>(entities =>
+            {
+
+
+                //Object.AddRange((IEnumerable<object>)entities);
+            });
         }
 
         // Facilitates unit-testing
