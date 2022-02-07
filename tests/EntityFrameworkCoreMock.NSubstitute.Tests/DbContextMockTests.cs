@@ -300,13 +300,40 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             });
         }
 
+        [Test]
+        public void DbContextMock_Add_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            dbContextMock.Object.Add(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_Remove_ShouldRemoveEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Remove(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
-        }
-
-        public class TestDbQueryMock : IDbQueryMock
-        {
         }
 
         public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
