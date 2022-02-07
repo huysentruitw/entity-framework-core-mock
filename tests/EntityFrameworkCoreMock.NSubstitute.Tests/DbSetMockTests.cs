@@ -98,7 +98,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             var dbSet = dbSetMock.Object;
 
             // Act
-            dbSet.UpdateRange(new []
+            dbSet.UpdateRange(new[]
             {
                 new User { Id = users[0].Id, FullName = "Ian Kilmister AAA" },
                 new User { Id = users[1].Id, FullName = "Phil Taylor AAA" },
@@ -375,6 +375,18 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public class ConcreteModel : AbstractModel
         {
             public string Name { get; set; } = "SomeName";
+        }
+
+        [Test]
+        public void DbSetMock_WithPrivateProperty_ShouldCopyIt()
+        {
+            var dbSetMock = new DbSetMock<PrivateSetterPropertyModel>(new[]
+            {
+                new PrivateSetterPropertyModel("my value")
+            }, (x, _) => x.Private);
+
+            var dbSet = dbSetMock.Object;
+            Assert.That(dbSet.First().Private, Is.EqualTo("my value"));
         }
     }
 }
