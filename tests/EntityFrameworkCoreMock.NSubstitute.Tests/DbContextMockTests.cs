@@ -410,10 +410,6 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             public int SaveChanges() => 55861;
         }
 
-        public class TestDbQueryMock : IDbQueryMock
-        {
-        }
-
         public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
 
         public class TestDbContext : DbContext

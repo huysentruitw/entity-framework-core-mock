@@ -50,6 +50,10 @@ namespace EntityFrameworkCoreMock
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
+            Setup(x => x.Add(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => mock.Object.Add(entity));
+            Setup(x => x.Remove(It.IsAny<TEntity>()))
+                .Callback<TEntity>(entity => mock.Object.Remove(entity));
             _dbSetCache.Add(entityType, mock);
             return mock;
         }
@@ -62,12 +66,17 @@ namespace EntityFrameworkCoreMock
             Setup(x => x.SaveChangesAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
             Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(SaveChanges);
 
-            var mockDbFacade = new Mock<DatabaseFacade>(Object);
-            var mockTransaction = new Mock<IDbContextTransaction>();
-            mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
-            mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(mockTransaction.Object));
-            Setup(x => x.Database).Returns(mockDbFacade.Object);
+            var lazyMockDbFacade = new Lazy<Mock<DatabaseFacade>>(() =>
+            {
+                var mockDbFacade = new Mock<DatabaseFacade>(Object);
+                var mockTransaction = new Mock<IDbContextTransaction>();
+                mockDbFacade.Setup(x => x.BeginTransaction()).Returns(mockTransaction.Object);
+                mockDbFacade.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(mockTransaction.Object);
+                return mockDbFacade;
+            });
+
+            Setup(x => x.Database).Returns(() => lazyMockDbFacade.Value.Object);
         }
 
         // Facilitates unit-testing

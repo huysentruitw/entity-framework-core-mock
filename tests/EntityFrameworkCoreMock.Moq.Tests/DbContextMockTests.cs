@@ -4,6 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityFrameworkCoreMock.Tests.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
+using Moq;
 using NUnit.Framework;
 
 namespace EntityFrameworkCoreMock.Tests
@@ -119,7 +122,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             Assert.DoesNotThrow(() => dbContextMock.CreateDbSetMock(x =>
-                x.ProtectedSetterPropertyModels, (x, _) => x, new[] {new ProtectedSetterPropertyModel()}));
+                x.ProtectedSetterPropertyModels, (x, _) => x, new[] { new ProtectedSetterPropertyModel() }));
         }
 
         [Ignore("Not yet ported to EntityFrameworkCoreMock")]
@@ -128,10 +131,10 @@ namespace EntityFrameworkCoreMock.Tests
             var userId = Guid.NewGuid();
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
-            dbSetMock.Object.Add(new User {Id = Guid.NewGuid(), FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
+            dbSetMock.Object.Add(new User { Id = Guid.NewGuid(), FullName = "SomeName" });
             dbContextMock.Object.SaveChanges();
-            dbSetMock.Object.Add(new User {Id = userId, FullName = "SomeName"});
+            dbSetMock.Object.Add(new User { Id = userId, FullName = "SomeName" });
             Assert.Throws<DbUpdateException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -140,7 +143,7 @@ namespace EntityFrameworkCoreMock.Tests
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
             var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
-            dbSetMock.Object.Remove(new User {Id = Guid.NewGuid()});
+            dbSetMock.Object.Remove(new User { Id = Guid.NewGuid() });
             Assert.Throws<DbUpdateConcurrencyException>(() => dbContextMock.Object.SaveChanges());
         }
 
@@ -153,7 +156,7 @@ namespace EntityFrameworkCoreMock.Tests
                 new GeneratedKeyModel {Value = "first"},
                 new GeneratedKeyModel {Value = "second"}
             });
-            dbSetMock.Object.Add(new GeneratedKeyModel {Value = "third" });
+            dbSetMock.Object.Add(new GeneratedKeyModel { Value = "third" });
             dbContextMock.Object.SaveChanges();
 
             Assert.That(dbSetMock.Object.Min(x => x.Id), Is.EqualTo(1));
@@ -222,7 +225,7 @@ namespace EntityFrameworkCoreMock.Tests
         public void DbContextMock_GenericSet_AsQueryable_ShouldReturnQueryable()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
-            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
+            dbContextMock.CreateDbSetMock(x => x.Users);
             var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet.AsQueryable(), Is.Not.Null);
         }
@@ -246,13 +249,75 @@ namespace EntityFrameworkCoreMock.Tests
             });
         }
 
+        [Test]
+        public void DbContextMock_Add_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            dbContextMock.Object.Add(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_Remove_ShouldRemoveEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Remove(user);
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(0));
+        }
+
+        [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
+        public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldNotThrow()
+        {
+            // Arrange
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() =>
+            {
+                dbContextMock.As<IDbContextDependencies>()
+                    .Setup(x => x.StateManager)
+                    .Returns(Mock.Of<IStateManager>());
+            });
+        }
+#pragma warning restore EF1001
+
+        [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
+        public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldUseAdditionalMockSetup()
+        {
+            // Arrange
+            var stateManager = Mock.Of<IStateManager>();
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+
+            // Act
+            dbContextMock.As<IDbContextDependencies>()
+                .Setup(x => x.StateManager)
+                .Returns(stateManager);
+
+            // Assert
+            Assert.That(((IDbContextDependencies)dbContextMock.Object).StateManager, Is.EqualTo(stateManager));
+        }
+#pragma warning restore EF1001
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
-        }
-
-        public class TestDbQueryMock : IDbQueryMock
-        {
         }
 
         public DbContextOptions Options { get; } = new DbContextOptionsBuilder().Options;
