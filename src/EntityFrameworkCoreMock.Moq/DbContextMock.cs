@@ -51,9 +51,9 @@ namespace EntityFrameworkCoreMock
             Setup(dbSetSelector).Returns(() => mock.Object);
             Setup(x => x.Set<TEntity>()).Returns(() => mock.Object);
             Setup(x => x.Add(It.IsAny<TEntity>()))
-                .Callback<TEntity>(entity => Object.Set<TEntity>().Add(entity));
+                .Callback<TEntity>(entity => mock.Object.Add(entity));
             Setup(x => x.Remove(It.IsAny<TEntity>()))
-                .Callback<TEntity>(entity => Object.Set<TEntity>().Remove(entity));
+                .Callback<TEntity>(entity => mock.Object.Remove(entity));
             _dbSetCache.Add(entityType, mock);
             return mock;
         }
