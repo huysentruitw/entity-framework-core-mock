@@ -281,6 +281,7 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
         public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldNotThrow()
         {
             // Arrange
@@ -294,8 +295,10 @@ namespace EntityFrameworkCoreMock.Tests
                     .Returns(Mock.Of<IStateManager>());
             });
         }
+#pragma warning restore EF1001
 
         [Test]
+#pragma warning disable EF1001 // Remove warning for use of internal EF Core infrastructure
         public void DbContextMock_AdditionalMockSetupAfterConstruction_ShouldUseAdditionalMockSetup()
         {
             // Arrange
@@ -310,6 +313,7 @@ namespace EntityFrameworkCoreMock.Tests
             // Assert
             Assert.That(((IDbContextDependencies)dbContextMock.Object).StateManager, Is.EqualTo(stateManager));
         }
+#pragma warning restore EF1001
 
         public class TestDbSetMock : IDbSetMock
         {
