@@ -378,7 +378,7 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         }
 
         [Test]
-        public void DbSetMock_WithPrivateProperty_ShouldCopyIt()
+        public void DbSetMock_ModelPropertyWithPrivateSetter_ShouldSetTheProperty()
         {
             var dbSetMock = new DbSetMock<PrivateSetterPropertyModel>(new[]
             {
