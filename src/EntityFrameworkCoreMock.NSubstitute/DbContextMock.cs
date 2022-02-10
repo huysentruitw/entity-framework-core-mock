@@ -53,6 +53,8 @@ namespace EntityFrameworkCoreMock.NSubstitute
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
             Object.Set<TEntity>().Returns(mock.Object);
             Object.Add<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.Add(callInfo.Arg<TEntity>()));
+            Object.AddAsync<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.AddAsync(callInfo.Arg<TEntity>()));
+            Object.Update<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.Update(callInfo.Arg<TEntity>()));
             Object.Remove<TEntity>(Arg.Any<TEntity>()).Returns(callInfo => mock.Object.Remove(callInfo.Arg<TEntity>()));
 
             dbSetSelector.Compile()(Object).Returns(mock.Object);
