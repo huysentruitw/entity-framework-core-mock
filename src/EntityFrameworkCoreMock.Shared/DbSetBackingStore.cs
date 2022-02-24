@@ -100,7 +100,7 @@ namespace EntityFrameworkCoreMock
                 else if (change.IsRemove) RemoveEntity(change.Entity);
             }
 
-            return _changes.Count;
+            return changes.Count;
         }
 
         /// <summary>
