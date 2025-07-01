@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Title>EntityFrameworkCoreMock.NSubstitute</Title>
     <Description>Easy Mock wrapper for mocking EntityFrameworkCore 5 (EFCore5) DbContext and DbSet using NSubstitute</Description>
-    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
-
   </PropertyGroup>
 
   <ItemGroup>
