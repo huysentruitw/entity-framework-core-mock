@@ -5,16 +5,18 @@
     <Description>Shared code for EntityFrameworkCoreMock</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[5.0.0,6.0.0)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[6.0.0,8.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="[6.0.2,8.0.0)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.0,10.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="[8.0.1,10.0.0)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
