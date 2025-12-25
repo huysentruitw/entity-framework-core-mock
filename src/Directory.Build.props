@@ -1,14 +1,13 @@
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0;net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <Product>EntityFrameworkCoreMock</Product>
     <Version>1.0.0.0</Version>
     <Authors>Wouter Huysentruit</Authors>
-    <Company>Cup of Tea</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/cup-of-tea-dot-be/entity-framework-core-mock</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/huysentruitw/entity-framework-core-mock</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright 2017-2021 Cup of Tea</Copyright>
+    <Copyright>Copyright 2017-2026 Wouter Huysentruit</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
