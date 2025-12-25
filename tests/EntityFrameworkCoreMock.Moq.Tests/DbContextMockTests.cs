@@ -267,6 +267,40 @@ namespace EntityFrameworkCoreMock.Tests
         }
 
         [Test]
+        public async Task DbContextMock_AddAsync_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            await dbContextMock.Object.AddAsync(user);
+            await dbContextMock.Object.SaveChangesAsync();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_Update_ShouldUpdateEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Update(new User { Id = user.Id, FullName = "Updated name" });
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Updated name"));
+        }
+
+        [Test]
         public void DbContextMock_Remove_ShouldRemoveEntity()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);

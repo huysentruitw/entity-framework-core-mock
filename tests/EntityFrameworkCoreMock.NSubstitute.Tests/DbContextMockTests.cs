@@ -93,7 +93,11 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_ShouldSetupMockForDbSetSelector()
         {
             var dbContextMock = new DbContextMock<TestDbContext>(Options);
+#if NET6_0_OR_GREATER
+            Assert.Throws<NotSupportedException>(() => dbContextMock.Object.Users.ToArray());
+#else
             Assert.Throws<NotImplementedException>(() => dbContextMock.Object.Users.ToArray());
+#endif
             dbContextMock.CreateDbSetMock(x => x.Users);
             Assert.That(dbContextMock.Object.Users, Is.Not.Null);
         }
@@ -315,6 +319,40 @@ namespace EntityFrameworkCoreMock.NSubstitute.Tests
             var actualUser = dbSet.First();
             Assert.That(actualUser, Is.Not.Null);
             Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public async Task DbContextMock_AddAsync_ShouldAddEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, Array.Empty<User>());
+
+            await dbContextMock.Object.AddAsync(user);
+            await dbContextMock.Object.SaveChangesAsync();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbContextMock_Update_ShouldUpdateEntity()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>(Options);
+            var user = new User { Id = Guid.NewGuid(), FullName = "Mark Kramer" };
+            dbContextMock.CreateDbSetMock(x => x.Users, new[] { user });
+
+            dbContextMock.Object.Update(new User { Id = user.Id, FullName = "Updated name" });
+            dbContextMock.Object.SaveChanges();
+
+            var dbSet = dbContextMock.Object.Users;
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            var actualUser = dbSet.First();
+            Assert.That(actualUser, Is.Not.Null);
+            Assert.That(actualUser.FullName, Is.EqualTo("Updated name"));
         }
 
         [Test]
