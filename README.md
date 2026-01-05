@@ -2,7 +2,11 @@
 
 ![Build status](https://github.com/cup-of-tea-dot-be/entity-framework-core-mock/actions/workflows/build-test-publish.yml/badge.svg?branch=master)
 
-Easy Mock wrapper for mocking EF Core 10 DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
+Easy Mock wrapper for mocking EntityFrameworkCore 5 through 10 (EFCore5-10) DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
+
+😢 Are you still stuck on EF Core 3.1? No worries, just visit [this repository](https://github.com/huysentruitw/entity-framework-core3-mock).
+
+😮 Wait, did you say EF6? You really should get worried! Anyway, visit [this repository](https://github.com/huysentruitw/entity-framework-mock).
 
 ## Get it on NuGet
 
