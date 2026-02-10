@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - master
+      - main
   pull_request:
     branches:
       - develop
@@ -24,10 +24,14 @@ jobs:
     - name: Use GitVersion
       id: gitversion # step id used as reference for output values
       uses: gittools/actions/gitversion/execute@v0.9.9
-    - name: Setup .NET 10
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET Runtime
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.*
+        dotnet-version: | 
+          5.x
+          6.x
+          8.x
+          10.x
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -35,7 +39,7 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
     - name: Publish
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/main'
       shell: pwsh
       run: |
         Get-ChildItem ".\src" -Filter "*.nupkg" -R | ForEach-Object {
